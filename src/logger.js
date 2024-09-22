@@ -1,9 +1,7 @@
 const winston = require('winston');
 
-// Define the timestamp format
 const timestampFormat = () => (new Date()).toLocaleTimeString();
 
-// Create logger
 const logger = winston.createLogger({
     format: winston.format.printf((info) => {
         return `${timestampFormat()} ${info.level.toUpperCase()}: ${info.message}`;

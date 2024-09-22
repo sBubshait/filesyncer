@@ -2,13 +2,14 @@ const AWS = require('aws-sdk');
 const config = require('../config.json');
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const s3 = new AWS.S3({
-    accessKeyId: config.accessKey,
-    secretAccessKey: config.secretAccessKey
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-const bucketName = config.bucketName;
+const bucketName = process.env.AWS_BUCKET_NAME;
 let absoluteDirectoryPath = config.folderToWatch;
 
 

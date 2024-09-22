@@ -17,6 +17,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const configPath = path.resolve(__dirname, './config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
+const envFilePath = path.resolve(__dirname, './.env');
+
+
 const shortcuts = {
     Desktop: path.join(os.homedir(), 'Desktop'),
     Documents: path.join(os.homedir(), 'Documents'),
@@ -196,11 +199,11 @@ const startSetup = async () => {
         if (isValid) {
             spinner.succeed('AWS credentials validated!');
             console.log("Syncing has started!");
-            config.accessKey = accessKeyId;
-            config.secretAccessKey = secretAccessKey;
-            config.bucketName = bucketName;
-            config.Region = Region;
+            
+            let envContent = `AWS_ACCESS_KEY_ID=${accessKeyId}\nAWS_SECRET_ACCESS_KEY=${secretAccessKey}\nAWS_BUCKET_NAME=${bucketName}\nAWS_REGION=${Region}`;
+            fs.writeFileSync(envFilePath, envContent);
             config.folderToWatch = absFolderPath;
+
             updateConfig();
             startWatching();
         } else {
