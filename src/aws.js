@@ -11,39 +11,38 @@ const s3 = new AWS.S3({
 
 const bucketName = process.env.AWS_BUCKET_NAME;
 
-
-async function uploadToS3(filePath) {
+async function uploadFile(fileID, filePath) {
     try {
         let fileContent = await fs.promises.readFile(filePath);
         let params = {
             Bucket: bucketName,
-            // filename only
-            Key: path.basename(filePath),
+            Key: fileID,
             Body: fileContent
         };
+
         let data = await s3.upload(params).promise();
     } catch(err) {
         console.log("Error", err);
     }
 }
 
-async function deleteFromS3(filePath) {
+async function deleteFile(fileID) {
     try {
         let params = {
             Bucket: bucketName,
-            Key: path.basename(filePath),
+            Key: fileID,
         };
+
         let data = await s3.deleteObject(params).promise();
-        await db.deleteFilePath(filePath);
     } catch(err) {
         console.log("Error", err);
     }
 }
 
-async function updateFile(filePath) {
+async function updateFile(fileID, filePath) {
     try {
-        await deleteFromS3(filePath);
-        await uploadToS3(filePath);
+        await deleteFile(fileID);
+        await uploadFile(fileID, filePath);
     } catch(err) {
         console.log("Error", err);
     }
@@ -51,7 +50,7 @@ async function updateFile(filePath) {
 
 
 module.exports =  {
-    uploadToS3,
-    deleteFromS3,
+    uploadFile,
+    deleteFile,
     updateFile
 }
