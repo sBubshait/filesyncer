@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The CLI for the project. This is the entry point for the program.
+
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
@@ -41,7 +41,7 @@ if (config.hasBeenSetup) {
     const isSyncing = await checkStatus();
 
     if (isSyncing) {
-    console.log(chalk.green("Status: ") + chalk.bgGreen(`Syncing`) + chalk.green(` - Watching folder: ${config.folderToWatch}\n`));
+    console.log(chalk.green("Status: ") + chalk.bgGreen(`Syncing`) + chalk.green(` - Watching (${config.foldersToWatch.length}) folder(s)\n`));
     } else {
         console.log(chalk.green("Status: ") + chalk.bgRed("Not Syncing\n"));
     }
@@ -51,7 +51,12 @@ if (config.hasBeenSetup) {
             name: 'task',
             type: 'list',
             message: 'What do you want to do?',
-            choices: [`${ isSyncing ? "Stop Syncing" : "Start Syncing"}`, 'Update Syncing Folder / AWS Credentials', 'Exit'],
+            choices: [
+                `${ isSyncing ? "Stop Syncing" : "Start Syncing"}`, 
+                'Add Directory to Sync', 
+                'Update AWS Credentials', 
+                'Exit'
+            ],
         },
     ])
     .then(answers => {
@@ -63,6 +68,9 @@ if (config.hasBeenSetup) {
             case 'Stop Syncing':
                 stopWatching();
                 console.log(chalk.blueBright("Stopped Syncing. You will have to restart the program to start syncing again!"));
+                break;
+            case 'Add Directory to Sync':
+                addDirectory();
                 break;
             case 'Update Syncing Folder / AWS Credentials':
                 startSetup();
@@ -103,13 +111,66 @@ if (config.hasBeenSetup) {
 
 
 const startSetup = async () => {
+    const { accessKeyId, secretAccessKey, bucketName, Region } = await inquirer.prompt([
+        {
+            name: 'accessKeyId',
+            type: 'input',
+            message: 'Enter your AWS Access Key ID. This will only be saved locally:',
+            validate: value => value.length ? true : 'Please enter your AWS Access Key ID.',
+        },
+        {
+            name: 'secretAccessKey',
+            type: 'input',
+            message: 'Enter your AWS Secret Access Key:',
+            validate: value => value.length ? true : 'Please enter your AWS Secret Access Key.',
+        },
+        {
+            name: 'bucketName',
+            type: 'input',
+            message: 'Enter your AWS Bucket Name:',
+            validate: value => value.length ? true : 'Please enter your AWS Bucket Name.',
+        },
+        {
+            name: 'Region',
+            type: 'input',
+            message: 'Enter your AWS Bucket Region:',
+            validate: value => value.length ? true : 'Please enter your AWS Bucket Region.',
+        },
+    ]);
+
+    const spinner = ora('Validating AWS credentials...').start();
+
+   
+    try {
+        const isValid = await validateCredentials(accessKeyId, secretAccessKey, bucketName, Region);
+        if (!isValid) {
+            spinner.fail('AWS credentials validation failed. Please check your credentials.');
+            return;
+        }
+
+        spinner.succeed('AWS credentials validated!');
+        console.log("Syncing has started!");
+
+        let envContent = `AWS_ACCESS_KEY_ID=${accessKeyId}\nAWS_SECRET_ACCESS_KEY=${secretAccessKey}\nAWS_BUCKET_NAME=${bucketName}\nAWS_REGION=${Region}`;
+        fs.writeFileSync(envFilePath, envContent);
+        config.foldersToWatch = [];
+
+        updateConfig();
+        startWatching();
+    } catch (err) {
+        console.log(err)
+        spinner.fail('An error occurred during AWS credentials validation. Please check your credentials.');
+    }
+};
+
+const addDirectory = async () => {
     let absFolderPath;
     const { folderPath } = await inquirer.prompt([
         {
             name: 'folderPath',
             type: 'input',
-            message: 'What folder would you want to sync? You can use shortcuts: Desktop, Documents, Downloads, Home. Example: Desktop/MyFolder.\nNow, enter the folder path:',
-            validate: function(value) {
+            message: 'Enter the folder path to sync (shortcuts: Desktop, Documents, Downloads, Home): [e.g. Desktop/MyFolder]',
+            validate: value => {
                 if (value.length) {
                     const fullPath = resolvePath(value);
                     if (!fs.existsSync(fullPath)) {
@@ -131,87 +192,23 @@ const startSetup = async () => {
         {
             name: 'confirm',
             type: 'confirm',
-            message: `There are ${filesCount} file(s) in the directory: ${absFolderPath}. Are you sure you want to sync the folder at "${folderPath}"?`,
+            message: `There are ${filesCount} file(s) in the directory: ${absFolderPath}. Are you sure you want to sync this folder?`,
         },
     ]);
 
     if (!confirm) {
-        console.log("Setup aborted.");
-        process.exit(0);
+        return
     }
 
-    const { accessKeyId, secretAccessKey, bucketName, Region } = await inquirer.prompt([
-        {
-            name: 'accessKeyId',
-            type: 'input',
-            message: 'Enter your AWS Access Key ID. This will only be saved locally:',
-            validate: function(value) {
-                if (value.length) {
-                    return true;
-                } else {
-                    return 'Please enter your AWS Access Key ID.';
-                }
-            },
-        },
-        {
-            name: 'secretAccessKey',
-            type: 'input',
-            message: 'Enter your AWS Secret Access Key:',
-            validate: function(value) {
-                if (value.length) {
-                    return true;
-                } else {
-                    return 'Please enter your AWS Secret Access Key.';
-                }
-            },
-        },
-        {
-            name: 'bucketName',
-            type: 'input',
-            message: 'Enter your AWS Bucket Name:',
-            validate: function(value) {
-                if (value.length) {
-                    return true;
-                } else {
-                    return 'Please enter your AWS Bucket Name.';
-                }
-            },
-        },
-        {
-            name: 'Region',
-            type: 'input',
-            message: 'Enter your AWS Bucket Region:',
-            validate: function(value) {
-                if (value.length) {
-                    return true;
-                } else {
-                    return 'Please enter your AWS Bucket Region.';
-                }
-            },
-        },
-    ]);
-
-    const spinner = ora('Validating AWS credentials...').start();
-
-   
-    try {
-        const isValid = await validateCredentials(accessKeyId, secretAccessKey, bucketName, Region);
-        if (isValid) {
-            spinner.succeed('AWS credentials validated!');
-            console.log("Syncing has started!");
-            
-            let envContent = `AWS_ACCESS_KEY_ID=${accessKeyId}\nAWS_SECRET_ACCESS_KEY=${secretAccessKey}\nAWS_BUCKET_NAME=${bucketName}\nAWS_REGION=${Region}`;
-            fs.writeFileSync(envFilePath, envContent);
-            config.folderToWatch = absFolderPath;
-
-            updateConfig();
-            startWatching();
-        } else {
-            spinner.fail('AWS credentials validation failed. Please check your credentials.');
-        }
-    } catch (err) {
-        spinner.fail('An error occurred during AWS credentials validation. Please check your credentials.');
+    if (!config.foldersToWatch) {
+        config.foldersToWatch = [];
     }
+
+    config.foldersToWatch.push(absFolderPath);
+
+    updateConfig();
+    restartWatching();
+    console.log(`Added '${absFolderPath}' to the list of folders to sync successfully!`);
 };
 
 function updateConfig() {
@@ -234,6 +231,15 @@ const startWatching = () => {
         console.log('Started watching.');
     } catch (error) {
         console.error(`Error while starting to watch: ${error}`);
+    }
+};
+
+const restartWatching = () => {
+    try {
+        execSync('pm2 restart filesyncer', { stdio: 'inherit' });
+        console.log('Restarted watching.');
+    } catch (error) {
+        console.error(`Error while restarting watch: ${error}`);
     }
 };
 

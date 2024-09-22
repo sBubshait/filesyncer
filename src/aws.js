@@ -10,7 +10,6 @@ const s3 = new AWS.S3({
 });
 
 const bucketName = process.env.AWS_BUCKET_NAME;
-let absoluteDirectoryPath = config.folderToWatch;
 
 
 async function uploadToS3(filePath) {
@@ -18,7 +17,8 @@ async function uploadToS3(filePath) {
         let fileContent = await fs.promises.readFile(filePath);
         let params = {
             Bucket: bucketName,
-            Key: path.relative(absoluteDirectoryPath, path.resolve(filePath)),
+            // filename only
+            Key: path.basename(filePath),
             Body: fileContent
         };
         let data = await s3.upload(params).promise();
@@ -31,7 +31,7 @@ async function deleteFromS3(filePath) {
     try {
         let params = {
             Bucket: bucketName,
-            Key: path.relative(absoluteDirectoryPath, path.resolve(filePath)),
+            Key: path.basename(filePath),
         };
         let data = await s3.deleteObject(params).promise();
         await db.deleteFilePath(filePath);

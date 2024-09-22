@@ -7,13 +7,15 @@ const ignored = require('./ignore');
 const config = require('../config.json');
 const logger = require('./logger');
 
-directoryPath = config.folderToWatch;
+if (!config.folderToWatch) {
+    logger.info('No folders to watch specified in config.json');
+}
 
-const watcher = chokidar.watch(directoryPath, {
-    persistent: true
+let watcher = chokidar.watch(config.foldersToWatch, {
+    persistent: true,
 });
 
-logger.info(`Watcher started for ${directoryPath}`);
+logger.info(`Watcher started for (${config.foldersToWatch.length}) folders`);
 
 watcher
     .on('add', async filePath => {
@@ -22,6 +24,7 @@ watcher
         var isIncluded = await db.includesFilePath(filePath);
         if (!isIncluded) {
             logger.info(`File ${filePath} adding to database and AWS S3 initated`);
+            console.log(filePath);
             await aws.uploadToS3(filePath);
             await db.addFilePath(filePath);
         }
