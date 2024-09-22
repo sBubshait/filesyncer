@@ -1,92 +1,29 @@
-const sqlite3 = require('sqlite3').verbose();
+const axios = require('axios');
 const logger = require('./logger');
-let isInit = false;
 
-let db = new sqlite3.Database('./fileDB.db', (err) => {
-    if (err) {
-        console.error(err.message);
-    }
-    logger.info('Connected to the file database.');
-});
+const API_URL = 'http://localhost:3000';
 
-async function init() {
-    if (isInit)
-        return true;
-    return new Promise((resolve, reject) => {
-        db.run(`CREATE TABLE IF NOT EXISTS filelist (
-            path TEXT PRIMARY KEY
-        )`, (err) => {
-            if (err) {
-                reject(err);
-            }
-            resolve();
-            isInit = true;
-            logger.info('Initialized file database.')
-        });
-    });
+async function addFile(pathname) {
+  try {
+    const response = await axios.post(`${API_URL}/addFile`, { pathname });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding file:', error);
+    logger.error(`Error adding file ${pathname}`);
+  }
 }
 
-async function addFilePath(filePath) {
-    await init();
-    return new Promise((resolve, reject) => {
-        db.run(`INSERT OR IGNORE INTO filelist(path) VALUES(?)`, [filePath], (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-async function deleteFilePath(filePath) {
-    await init();
-    return new Promise((resolve, reject) => {
-        db.run(`DELETE FROM filelist WHERE path = ?`, [filePath], (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-async function getAllFilePaths() {
-    await init();
-    return new Promise((resolve, reject) => {
-        db.all(`SELECT path FROM filelist`, [], (err, rows) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(rows);
-            }
-        });
-    });
-}
-
-// includes function
-async function includesFilePath(filePath) {
-    await init();
-    return new Promise((resolve, reject) => {
-        db.get(`SELECT path FROM filelist WHERE path = ?`, [filePath], (err, row) => {
-            if (err) {
-                reject(err);
-            } else {
-                if (row) {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            }
-        });
-    });
+async function removeFile(pathname) {
+  try {
+    const response = await axios.post('http://localhost:3000/removeFile', { pathname });
+    return response.status === 200;
+  } catch (error) {
+    console.error('Error removing file:', error);
+    return false;
+  }
 }
 
 module.exports = {
-    init,
-    addFilePath,
-    deleteFilePath,
-    getAllFilePaths,
-    includesFilePath
+  addFile,
+  removeFile
 };
