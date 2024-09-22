@@ -7,40 +7,47 @@ const ignored = require('./ignore');
 const config = require('../config.json');
 const logger = require('./logger');
 
-if (!config.folderToWatch) {
+if (config.foldersToWatch.length == 0) {
     logger.info('No folders to watch specified in config.json');
+} else {
+    logger.info(`Watcher started for (${config.foldersToWatch.length}) folders`);
 }
 
 let watcher = chokidar.watch(config.foldersToWatch, {
     persistent: true,
 });
 
-logger.info(`Watcher started for (${config.foldersToWatch.length}) folders`);
-
 watcher
     .on('add', async filePath => {
         if (ignored.includes(path.basename(filePath))) 
             return false;
-        var isIncluded = await db.includesFilePath(filePath);
-        if (!isIncluded) {
-            logger.info(`File ${filePath} adding to database and AWS S3 initated`);
-            console.log(filePath);
-            await aws.uploadToS3(filePath);
-            await db.addFilePath(filePath);
+
+        const { added, fileID } = await db.addFile(filePath);
+        if (added) {
+            logger.info(`New file detected: ${filePath}. Adding to database with ID ${fileID}...`);
+            
+            await aws.uploadFile(fileID, filePath);
         }
     })
 
-    .on('change', filePath => {
+    .on('change', async filePath => {
         if (ignored.includes(path.basename(filePath))) 
             return false;
-        logger.info(`File ${filePath} has been changed. Updating AWS S3`);
-        aws.updateFile(filePath);
+
+        const fileID = await db.getFileID(filePath);
+        if (fileID) {
+            logger.info(`File update detected: ${filePath} with ID ${fileID}. Reuploading to Storage...`);
+            aws.updateFile(fileID, filePath);
+        }
     })
     
-    .on('unlink', filePath => {
+    .on('unlink', async filePath => {
         if (ignored.includes(path.basename(filePath))) 
             return false;
-        logger.info(`File ${filePath} has been deleted. Deleting from AWS S3`);
-        aws.deleteFromS3(filePath);
-        db.deleteFilePath(filePath);
+        
+        const fileID = await db.getFileID(filePath);
+        if (fileID) {
+            logger.info(`File deletion detected: ${filePath} with ID ${fileID}. Removing from Storage...`);
+            aws.deleteFile(fileID);
+        }
     });
