@@ -1,0 +1,11 @@
+{
+    "extends": "@tsconfig/node-lts/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "dist",
+        "rootDir": "./src",
+        "removeComments": true,
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+  }
+  
