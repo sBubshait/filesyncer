@@ -23,7 +23,18 @@ async function removeFile(pathname) {
   }
 }
 
+async function getFileID(pathname) {
+  try {
+    const response = await axios.get(`${API_URL}/getFileID?pathname=${pathname}`);
+    return response.data.fileID;
+  } catch (error) {
+    console.error('Error getting file ID:', error);
+    return null;
+  }
+}
+
 module.exports = {
+  getFileID,
   addFile,
   removeFile
 };
