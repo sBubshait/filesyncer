@@ -21,8 +21,8 @@ watcher
     .on('add', async filePath => {
         if (ignored.includes(path.basename(filePath))) 
             return false;
-
-        const { added, fileID } = await db.addFile(filePath);
+        const size = fs.statSync(filePath).size;
+        const { added, fileID } = await db.addFile(filePath, size);
         if (added) {
             logger.info(`New file detected: ${filePath}. Adding to database with ID ${fileID}...`);
             

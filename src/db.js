@@ -3,9 +3,9 @@ const logger = require('./logger');
 
 const API_URL = require('../config.json').API_URL;
 
-async function addFile(pathname) {
+async function addFile(pathname, size) {
   try {
-    const response = await axios.post(`${API_URL}/addFile`, { pathname });
+    const response = await axios.post(`${API_URL}/addFile`, { pathname, size });
     return response.data;
   } catch (error) {
     console.error('Error adding file:', error);

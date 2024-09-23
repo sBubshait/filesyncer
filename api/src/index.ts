@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/addFile', async (req: Request, res: Response) => {
-  const { pathname } = req.body;
+  const { pathname, size } = req.body;
 
   if (!pathname) {
     res.status(400).json({ added: false });
@@ -69,6 +69,7 @@ app.post('/addFile', async (req: Request, res: Response) => {
     await db.addFile({
       fileID: fileID,
       folderID: parentFolder,
+      size: size,
       fileName: filename,
       fileType,
       filePath: pathname,
