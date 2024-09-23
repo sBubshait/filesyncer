@@ -54,7 +54,7 @@ app.post('/addFile', async (req: Request, res: Response) => {
 
       // Link the parent folder to its most similar ancestor/descendant
       if (mostSimilarFolderID && mostSimilarFolderPath) {
-        console.log("linking" + mostSimilarFolderPath + " to " + parentFolderPath);
+        console.log("linking" + mostSimilarFolderPath + " to " + parentFolderPath + " isAncestor: " + isAncestor);
         if (isAncestor)
           await linkFolders({folderID: mostSimilarFolderID, folderPath: mostSimilarFolderPath}, {folderID: newFolderID, folderPath: parentFolderPath});
         else
@@ -83,31 +83,43 @@ app.post('/addFile', async (req: Request, res: Response) => {
 });
 
 const findMostSimilarFolder = async (folderPath: string) => {
-  let mostSimilarFolderPath = null;
+  let mostSimilarFolderPath: string | null = null;
   let mostSimilarFolderID = null;
   let isAncestor = null;
 
-  let allFolders = await db.getAllFolders();
+  const allFolders = await db.getAllFolders();
+  const folderPathPartsCount = folderPath.split('/').length;
   let maxCommonPathLength = 0;
 
   allFolders.forEach(folder => {
     const currentFolderPath = folder.folderPath;
+    const currentFolderPathPartsCount = currentFolderPath.split('/').length;
+
     let commonPathLength = 0;
 
-    if (folderPath.startsWith(currentFolderPath)) {
-      // currentFolderPath is an ancestor of folderPath
+    if (folderPath.startsWith(currentFolderPath) && folderPathPartsCount > currentFolderPathPartsCount) {
+      console.log("currentFolderPath: " + currentFolderPath + " folderPath: " + folderPath);
+      // currentFolderPath is a *true* (not a sibling) ancestor of folderPath
       commonPathLength = currentFolderPath.length;
-      if (commonPathLength > maxCommonPathLength) {
+      // prioritize the closest ancestor if multiple
+      if (
+        commonPathLength > maxCommonPathLength ||
+        (commonPathLength === maxCommonPathLength && mostSimilarFolderPath !== null && currentFolderPathPartsCount > mostSimilarFolderPath.split('/').length)
+      ) {
         maxCommonPathLength = commonPathLength;
         mostSimilarFolderPath = currentFolderPath;
         mostSimilarFolderID = folder.folderID;
         isAncestor = true;
       }
 
-    } else if (currentFolderPath.startsWith(folderPath)) {
-      // folderPath is an ancestor of currentFolderPath
+    } else if (currentFolderPath.startsWith(folderPath) && currentFolderPathPartsCount > folderPathPartsCount) {
+      console.log("currentFolderPath: " + currentFolderPath + " folderPath: " + folderPath);
+      // folderPath is a *true* (not a sibling) ancestor of currentFolderPath
       commonPathLength = folderPath.length;
-      if (commonPathLength > maxCommonPathLength) {
+      if (
+        commonPathLength > maxCommonPathLength ||
+        (commonPathLength === maxCommonPathLength && mostSimilarFolderPath !== null && currentFolderPathPartsCount < mostSimilarFolderPath.split('/').length)
+      ) {
         maxCommonPathLength = commonPathLength;
         mostSimilarFolderPath = currentFolderPath;
         mostSimilarFolderID = folder.folderID;
@@ -134,7 +146,7 @@ const linkFolders = async (ancestor: {folderID: string, folderPath: string}, des
     let currentFolderID = ancestorID;
     let currentFolderPath = ancestorPath;
 
-    let pathParts = descendantParts.slice(ancestorParts.length);
+    let pathParts = descendantParts.slice(ancestorParts.length, descendantParts.length - 1);
 
     for (const part of pathParts) {
       currentFolderPath += `/${part}`;
