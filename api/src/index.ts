@@ -72,6 +72,44 @@ app.post('/addFile', async (req: Request, res: Response) => {
   }
 });
 
+
+const findMostSimilarFolder = async (folderPath: string) => {
+  let mostSimilarFolderPath = null;
+  let mostSimilarFolderID = null;
+  let isAncestor = null;
+
+  let allFolders = await db.getAllFolders();
+  let maxCommonPathLength = 0;
+
+  allFolders.forEach(folder => {
+    const currentFolderPath = folder.folderPath;
+    let commonPathLength = 0;
+
+    if (folderPath.startsWith(currentFolderPath)) {
+      // currentFolderPath is an ancestor of folderPath
+      commonPathLength = currentFolderPath.length;
+      if (commonPathLength > maxCommonPathLength) {
+        maxCommonPathLength = commonPathLength;
+        mostSimilarFolderPath = currentFolderPath;
+        mostSimilarFolderID = folder.folderID;
+        isAncestor = true;
+      }
+
+    } else if (currentFolderPath.startsWith(folderPath)) {
+      // folderPath is an ancestor of currentFolderPath
+      commonPathLength = folderPath.length;
+      if (commonPathLength > maxCommonPathLength) {
+        maxCommonPathLength = commonPathLength;
+        mostSimilarFolderPath = currentFolderPath;
+        mostSimilarFolderID = folder.folderID;
+        isAncestor = false;
+      }
+    }
+  });
+  
+  return { mostSimilarFolderPath, mostSimilarFolderID, isAncestor };
+};
+
 app.post('/deleteFile', (req: Request, res: Response) => {
   const { fileID } = req.body;
   res.json({ deleted: true });
