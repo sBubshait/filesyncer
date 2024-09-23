@@ -1,7 +1,7 @@
 const axios = require('axios');
 const logger = require('./logger');
 
-const API_URL = 'http://localhost:3000';
+const API_URL = require('../config.json').API_URL;
 
 async function addFile(pathname) {
   try {
@@ -13,9 +13,9 @@ async function addFile(pathname) {
   }
 }
 
-async function removeFile(pathname) {
+async function deleteFile(fileID) {
   try {
-    const response = await axios.post('http://localhost:3000/removeFile', { pathname });
+    const response = await axios.post(`${API_URL}/deleteFile`, { fileID });
     return response.status === 200;
   } catch (error) {
     console.error('Error removing file:', error);
@@ -26,6 +26,7 @@ async function removeFile(pathname) {
 async function getFileID(pathname) {
   try {
     const response = await axios.get(`${API_URL}/getFileID?pathname=${pathname}`);
+    console.log(response.data);
     return response.data.fileID;
   } catch (error) {
     console.error('Error getting file ID:', error);
@@ -36,5 +37,5 @@ async function getFileID(pathname) {
 module.exports = {
   getFileID,
   addFile,
-  removeFile
+  deleteFile
 };

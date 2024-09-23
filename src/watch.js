@@ -37,6 +37,7 @@ watcher
         const fileID = await db.getFileID(filePath);
         if (fileID) {
             logger.info(`File update detected: ${filePath} with ID ${fileID}. Reuploading to Storage...`);
+
             aws.updateFile(fileID, filePath);
         }
     })
@@ -48,6 +49,8 @@ watcher
         const fileID = await db.getFileID(filePath);
         if (fileID) {
             logger.info(`File deletion detected: ${filePath} with ID ${fileID}. Removing from Storage...`);
+
+            db.deleteFile(fileID);
             aws.deleteFile(fileID);
         }
     });
