@@ -38,7 +38,7 @@ export async function findFileByPath(filePath: string): Promise<string | null> {
   const [rows] = await pool.execute<RowDataPacket[]>(query, [filePath]);
 
   const files = rows as FileData[];
-  return files.length > 0 ? files[0].fileID : null;
+  return files.length > 0 ? files[0].fileID : "";
 }
 
 export async function addFile(fileData: FileData): Promise<void> {
@@ -70,9 +70,9 @@ export async function addFile(fileData: FileData): Promise<void> {
   ]);
 }
 
-export async function deleteFile(filePath: string): Promise<void> {
-  const query = "DELETE FROM files WHERE filePath = ?";
-  await pool.execute(query, [filePath]);
+export async function deleteFile(fileID: string): Promise<void> {
+  const query = "DELETE FROM files WHERE fileID = ?";
+  await pool.execute(query, [fileID]);
 }
 
 export async function findFolderByPath(folderPath: string): Promise<string | null> {
@@ -80,7 +80,7 @@ export async function findFolderByPath(folderPath: string): Promise<string | nul
   const [rows] = await pool.execute<RowDataPacket[]>(query, [folderPath]);
 
   const folders = rows as FolderData[];
-  return folders.length > 0 ? folders[0].folderID : null;
+  return folders.length > 0 ? folders[0].folderID : "";
 };
 
 export async function getAllFolders(): Promise<FolderData[]> {

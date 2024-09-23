@@ -65,16 +65,16 @@ app.post('/addFile', async (req: Request, res: Response) => {
     // At this point, we have the parent folder created and linked to its ancestor/descendant if there are any.
     // We can now add the file.
 
-    const newFileID = uuidv4();
+    const fileID = uuidv4();
     await db.addFile({
-      fileID: newFileID,
+      fileID: fileID,
       folderID: parentFolder,
       fileName: filename,
       fileType,
       filePath: pathname,
     });
     
-    res.json({ added: true, newFileID });
+    res.json({ added: true, fileID });
 
   } catch (error) {
     console.error(error);
@@ -171,9 +171,9 @@ const linkFolders = async (ancestor: {folderID: string, folderPath: string}, des
   }
 };
 
-app.get('/getFileID', (req: Request, res: Response) => {
+app.get('/getFileID', async (req: Request, res: Response) => {
   const { pathname } = req.query;
-  const fileID = db.findFileByPath(pathname as string);
+  const fileID = await db.findFileByPath(pathname as string);
   res.json({ fileID });
 });
 
