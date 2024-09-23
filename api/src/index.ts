@@ -8,6 +8,11 @@ app.use(express.json());
 app.post('/addFile', async (req: Request, res: Response) => {
   const { pathname } = req.body;
 
+  if (!pathname) {
+    res.status(400).json({ added: false });
+    return;
+  }
+
   const fileParts = pathname.substring(pathname.lastIndexOf('/') + 1).split('.');
   const filename = fileParts[0];
   const fileType = fileParts.length > 1 ? fileParts[1] : '';
@@ -15,7 +20,7 @@ app.post('/addFile', async (req: Request, res: Response) => {
   const parentFolderName = parentFolderPath.split('/').pop();
 
   // Check if the file already exists
-  const fileExists = db.findFileByPath(pathname);
+  const fileExists = await db.findFileByPath(pathname);
   if (fileExists) {
     res.json({ added: false, fileID: fileExists });
     return;
@@ -25,6 +30,18 @@ app.post('/addFile', async (req: Request, res: Response) => {
     let parentFolder = await db.findFolderByPath(parentFolderPath);
     
     if (!parentFolder) {
+      // We need to create the parentFolder. But first, we may need to create
+      // and link any ancestor/descendant folders to this to-be-created
+      // folder. E.g., if we already have a/ then if we add a/b/c.txt, we need to
+      // link c to be the parent of b.
+
+      // We can't have both mostSimilarAncestor and mostSimilarDescendant as then we'd have 
+      // the parent folder already created and linked, but this is not the case. So, at least 
+      // one of the two is null. Hence, we use one function to get this 'most similar' folder.
+
+      const { mostSimilarFolderPath, mostSimilarFolderID, isAncestor } = await findMostSimilarFolder(parentFolderPath);
+
+      // Now create the folder
       const newFolderID = uuidv4();
       await db.createFolder({
         folderID: newFolderID,
@@ -35,21 +52,14 @@ app.post('/addFile', async (req: Request, res: Response) => {
 
       parentFolder = newFolderID;
 
-      // We need to link any ancestor/descendant folders to this newly created
-      // folder. E.g., if we already have a/ then if we add a/b/c.txt, we need to
-      // link c to be the parent of b.
-
-      // We can't have both mostSimilarAncestor and mostSimilarDescendant as then we'd have 
-      // the parent folder already created and linked, but this is not the case. So, at least 
-      // one of the two is null. Hence, we use one function to get this 'most similar' folder.
-
-      const { mostSimilarFolderPath, mostSimilarFolderID, isAncestor } = await db.findMostSimilarFolder(parentFolderPath);
-
-      if (isAncestor)
-        await linkFolders({mostSimilarFolderID, mostSimilarFolderPath}, {newFolderID, parentFolderPath});
-      else
-        await linkFolders({newFolderID, parentFolderPath}, {mostSimilarFolderID, mostSimilarFolderPath});
-      
+      // Link the parent folder to its most similar ancestor/descendant
+      if (mostSimilarFolderID && mostSimilarFolderPath) {
+        console.log("linking" + mostSimilarFolderPath + " to " + parentFolderPath);
+        if (isAncestor)
+          await linkFolders({folderID: mostSimilarFolderID, folderPath: mostSimilarFolderPath}, {folderID: newFolderID, folderPath: parentFolderPath});
+        else
+          await linkFolders({folderID: newFolderID, folderPath: parentFolderPath}, {folderID: mostSimilarFolderID, folderPath: mostSimilarFolderPath});
+      }
     }
     
     // At this point, we have the parent folder created and linked to its ancestor/descendant if there are any.
@@ -71,7 +81,6 @@ app.post('/addFile', async (req: Request, res: Response) => {
     res.status(500).json({ added: false });
   }
 });
-
 
 const findMostSimilarFolder = async (folderPath: string) => {
   let mostSimilarFolderPath = null;
@@ -110,6 +119,46 @@ const findMostSimilarFolder = async (folderPath: string) => {
   return { mostSimilarFolderPath, mostSimilarFolderID, isAncestor };
 };
 
+/** 
+ * Links two folders together. Creates all intermediate folders if they don't exist and links them appropriately.
+ * Precondition: ancestorPath is the closest ancestor of descendantPath in the database or vice versa.
+ */
+const linkFolders = async (ancestor: {folderID: string, folderPath: string}, descendant: {folderID: string, folderPath: string}) => {
+  try {
+    const { folderID: ancestorID, folderPath: ancestorPath } = ancestor;
+    const { folderID: descendantID, folderPath: descendantPath } = descendant;
+
+    const ancestorParts = ancestorPath.split('/');
+    const descendantParts = descendantPath.split('/');
+
+    let currentFolderID = ancestorID;
+    let currentFolderPath = ancestorPath;
+
+    let pathParts = descendantParts.slice(ancestorParts.length);
+
+    for (const part of pathParts) {
+      currentFolderPath += `/${part}`;
+      // currentFolderPath does not exist in the database as otherwise it would be the most similar folder. 
+
+      const newFolderID = uuidv4();
+      await db.createFolder({
+        folderID: newFolderID,
+        parentFolderID: currentFolderID,
+        folderName: part,
+        folderPath: currentFolderPath,
+      });
+
+      currentFolderID = newFolderID;
+    }
+
+    // Finally link the descendant to the last created / existing folder.
+    await db.updateFolderParent(descendantID, currentFolderID);
+
+  } catch (error) {
+    console.error('Error linking folders:', error);  
+  }
+};
+
 app.post('/deleteFile', (req: Request, res: Response) => {
   const { fileID } = req.body;
   res.json({ deleted: true });
@@ -120,6 +169,16 @@ app.get('/getFileID', (req: Request, res: Response) => {
   res.json({ fileID: uuidv4() });
 });
 
+app.get('/getHome', async (req: Request, res: Response) => {
+  try {
+    // Find all folders with no parent
+    const homeFolders = await db.getHomeFolders();
+    res.json(homeFolders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: true });
+  }
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
