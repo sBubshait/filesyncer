@@ -70,7 +70,7 @@ export async function addFile(fileData: FileData): Promise<void> {
   ]);
 }
 
-export async function removeFile(filePath: string): Promise<void> {
+export async function deleteFile(filePath: string): Promise<void> {
   const query = "DELETE FROM files WHERE filePath = ?";
   await pool.execute(query, [filePath]);
 }
@@ -128,7 +128,7 @@ export async function updateFolderParent(folderID: string, parentFolderID: strin
 export default {
   findFileByPath,
   addFile,
-  removeFile,
+  deleteFile,
   getAllFolders,
   findFolderByPath,
   getHomeFolders,

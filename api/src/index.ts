@@ -171,14 +171,21 @@ const linkFolders = async (ancestor: {folderID: string, folderPath: string}, des
   }
 };
 
-app.post('/deleteFile', (req: Request, res: Response) => {
-  const { fileID } = req.body;
-  res.json({ deleted: true });
-});
-
 app.get('/getFileID', (req: Request, res: Response) => {
   const { pathname } = req.query;
-  res.json({ fileID: uuidv4() });
+  const fileID = db.findFileByPath(pathname as string);
+  res.json({ fileID });
+});
+
+app.post('/deleteFile', async (req: Request, res: Response) => {
+  const { fileID } = req.body;
+  try {
+    await db.deleteFile(fileID);
+    res.json({ deleted: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ deleted: false });
+  }
 });
 
 app.get('/getHome', async (req: Request, res: Response) => {
