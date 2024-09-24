@@ -14,18 +14,18 @@ import {
 } from "./icons/ActionIcons"
 import { FolderIcon, getFileIcon, canViewFile } from "./icons/FileIcons";
 import { TrashIcon } from "./icons/OtherIcons";
-import { SearchIcon, MinusSearchIcon } from "./icons/OtherIcons";
+import { SearchIcon, MinusSearchIcon, HourglassIcon } from "./icons/OtherIcons";
 
 export default function SearchResultsFilesCard({
   title,
   files,
-  extended,
-  query
+  query,
+  isLoading
 }: {
   title: string;
   files: FileFolder[];
-  extended?: boolean;
   query?: string;
+  isLoading?: boolean;
 }) {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [highlighted, setHighlighted] = useState<string | null>(null);
@@ -51,11 +51,23 @@ export default function SearchResultsFilesCard({
 
   return (
     <div
-      className={`mt-5 ${extended ? 'min-h-[calc(100vh-6rem)]' : ''} ${
+      className={`mt-5 min-h-[calc(100vh-10rem)] ${
         files.length === 0 ? 'grid grid-cols-1' : ''
       } rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700`}
     >
       <h1 className="text-xl font-semibold dark:text-white">{title}</h1>
+      {isLoading && (
+        <div className="flex h-full items-center justify-center">
+        <HourglassIcon className="mr-4 size-12 text-gray-500" />
+        <div className="flex flex-col items-start">
+          <p className="text-xl font-semibold dark:text-white">Loading...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Please wait...
+          </p>
+        </div>
+      </div>
+      )}
+
       {!query && (
         <div className="flex h-full items-center justify-center">
         <SearchIcon className="mr-4 size-12 text-gray-500" />
@@ -67,6 +79,7 @@ export default function SearchResultsFilesCard({
         </div>
       </div>
       )}
+
       {query && files.length === 0 && (
         <div className="flex h-full items-center justify-center">
           <MinusSearchIcon className="mr-4 size-12 text-gray-500" />

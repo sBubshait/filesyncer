@@ -28,8 +28,5 @@ export default function SearchResults({ query }: { query: string }) {
     fetchResults();
   }, [query]);
 
-  if (loading) {
-    return <p>Loading search results...</p>;
-  }
-  return <SearchResultsFilesCard query={query} title="Search Results" files={files} extended={true} />;
+  return <SearchResultsFilesCard isLoading={loading} query={query} title="Search Results" files={files} />;
 }

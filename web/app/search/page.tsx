@@ -70,9 +70,7 @@ export default function Home() {
           </div>
         </form>
 
-        <Suspense fallback={<div>Loading ... </div>}>
-          <SearchResults query={searchQuery} />
-         </Suspense>
+        <SearchResults query={searchQuery} />
       </div>
     </>
   );
