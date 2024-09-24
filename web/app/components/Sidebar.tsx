@@ -1,11 +1,5 @@
 import Link from "next/link";
-
-export interface SidebarItem {
-  name: string;
-  icon: React.ReactNode;
-  href: string;
-  tag: string | null;
-}
+import { SidebarItem } from "../types.js";
 
 export default function Sidebar({
   items,
