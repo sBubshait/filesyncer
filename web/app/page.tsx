@@ -8,7 +8,7 @@ import { getSection } from "./api";
 
 export default async function Home() {
   const recentFiles: FileFolder[] = (await getSection("recent"));
-  console.log(recentFiles)
+  
   return (
     <>
     <Navbar title="FileSyncer" />

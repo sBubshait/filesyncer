@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from 'next/navigation'
 import Link from "next/link";
 import { FileFolder } from "../types.js";
 import {
@@ -24,6 +25,8 @@ export default function FilesCard({
   extended?: boolean;
 }) {
   const [openModal, setOpenModal] = useState<string | null>(null);
+  const [highlighted, setHighlighted] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleOpenModal = (fileID: string) => {
     setOpenModal(fileID);
@@ -33,29 +36,51 @@ export default function FilesCard({
     setOpenModal(null);
   };
 
+  const handleFileClick = (file: FileFolder) => {
+    if (highlighted === file.fileID && file.type === 'folder') {
+      // If already highlighted, navigate to /view/{fileID}
+      router.push(`/folder/${file.fileID}`);
+    } else {
+      // Highlight the clicked file
+      setHighlighted(file.fileID);
+    }
+  };
+
   return (
-    <div className={`mt-5 ${extended ? "min-h-[calc(100vh-6rem)]" : ""} ${files.length == 0 ? "grid grid-cols-1" : ""} rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700`}>
+    <div
+      className={`mt-5 ${extended ? 'min-h-[calc(100vh-6rem)]' : ''} ${
+        files.length === 0 ? 'grid grid-cols-1' : ''
+      } rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700`}
+    >
       <h1 className="text-xl font-semibold dark:text-white">{title}</h1>
       {files.length === 0 && (
-  <div className="flex h-full items-center justify-center">
-    <TrashIcon className="mr-4 size-12 text-gray-500" />
-    <div className="flex flex-col items-start">
-      <p className="text-xl font-semibold dark:text-white">Nothing here</p>
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        Start by adding files to your directory.
-      </p>
-    </div>
-  </div>
-)}
+        <div className="flex h-full items-center justify-center">
+          <TrashIcon className="mr-4 size-12 text-gray-500" />
+          <div className="flex flex-col items-start">
+            <p className="text-xl font-semibold dark:text-white">Nothing here</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Start by adding files to your directory.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="mb-2 mt-4 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:xl:grid-cols-5">
         {files.map((file) => (
           <div
-            className="w-full max-w-sm rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
+            className={`w-full max-w-sm rounded-lg border ${
+              highlighted === file.fileID
+                ? 'border-indigo-700'
+                : 'border-gray-200 dark:border-gray-700'
+            } bg-white shadow dark:bg-gray-800`}
             key={file.fileID}
+            onClick={() => handleFileClick(file)}
           >
             <div className="flex justify-end px-4 pt-2">
               <button
-                onClick={() => handleOpenModal(file.fileID)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenModal(file.fileID);
+                }}
                 className="inline-block rounded-lg p-1.5 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
                 type="button"
               >
@@ -79,7 +104,7 @@ export default function FilesCard({
                       <div className="flex items-center justify-between rounded-t border-b p-4 md:p-5 dark:border-gray-600">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                           {file.name}
-                          {file.type == "file" && `.${file.extension}`}
+                          {file.type == 'file' && `.${file.extension}`}
                         </h3>
                         <button
                           type="button"
@@ -93,7 +118,11 @@ export default function FilesCard({
                       {/* Modal body */}
                       <div className="space-y-4 p-4 md:p-5">
                         <div
-                          className={`grid ${canViewFile(file.extension) ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4 p-4 sm:grid-cols-2 md:p-5`}
+                          className={`grid ${
+                            canViewFile(file.extension)
+                              ? 'md:grid-cols-4'
+                              : 'md:grid-cols-3'
+                          } gap-4 p-4 sm:grid-cols-2 md:p-5`}
                         >
                           {canViewFile(file.extension) && (
                             <ModalButton
@@ -112,13 +141,13 @@ export default function FilesCard({
                           <ModalButton
                             icon={<HeartIcon />}
                             text="Favourite"
-                            action={() => console.log("Favourited")}
+                            action={() => console.log('Favourited')}
                           />
 
                           <ModalButton
                             icon={<DeleteIcon />}
                             text="Delete"
-                            action={() => console.log("Deleted")}
+                            action={() => console.log('Deleted')}
                           />
                         </div>
                       </div>
@@ -130,15 +159,21 @@ export default function FilesCard({
 
             <div className="flex flex-col items-center p-6 pt-0">
               <div className="size-12">
-                {file.type === "folder" ? (
+                {file.type === 'folder' ? (
                   <FolderIcon />
                 ) : (
                   getFileIcon(file.extension)
                 )}
               </div>
-              <p className="mt-2 font-bold dark:text-white">{file.name}</p>
+              <p
+                className={`mt-2 font-bold ${
+                  highlighted === file.fileID ? 'text-indigo-700' : 'dark:text-white'
+                }`}
+              >
+                {file.name}
+              </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {file.size} KB {file.extension ? " | " + file.extension : ""}
+                {file.size} KB {file.extension ? ' | ' + file.extension : ''}
               </p>
             </div>
           </div>

@@ -10,6 +10,6 @@ export interface FileFolder {
     type: "file" | "folder";
     name: string;
     extension: string;
-    size: number;
+    size?: number;
     modifiedAt: string;
 }
