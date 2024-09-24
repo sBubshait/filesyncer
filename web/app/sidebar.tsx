@@ -74,8 +74,6 @@ const ClockIcon = (
     className="size-5"
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
-    width={24}
-    height={24}
     fill="currentColor"
     viewBox="0 0 24 24"
   >
@@ -87,6 +85,25 @@ const ClockIcon = (
   </svg>
 );
 
+const SearchIcon = (
+  <svg
+  className="size-5"
+  aria-hidden="true"
+  xmlns="http://www.w3.org/2000/svg"
+  width={24}
+  height={24}
+  fill="currentColor"
+  viewBox="0 0 24 24"
+>
+  <path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z" />
+  <path
+    fillRule="evenodd"
+    d="M21.707 21.707a1 1 0 0 1-1.414 0l-3.5-3.5a1 1 0 0 1 1.414-1.414l3.5 3.5a1 1 0 0 1 0 1.414Z"
+    clipRule="evenodd"
+  />
+</svg>
+);
+
 // website sidebar items
 export const sidebarItems: {
   topItems: SidebarItem[];
@@ -94,6 +111,7 @@ export const sidebarItems: {
 } = {
   topItems: [
     { name: "Home", href: "/", icon: HomeIcon },
+    { name: "Search", href: "/search", icon: SearchIcon },
     { name: "All Files", href: "/files", icon: FilesIcon, tag: "9" },
     { name: "Favourites", href: "/favourites", icon: HeartIcon, tag: "4" },
     { name: "Recent", href: "/recent", icon: ClockIcon },
