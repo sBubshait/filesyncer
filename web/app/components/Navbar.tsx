@@ -1,6 +1,8 @@
 // Navbar component
 
-export default function Navbar({title} : {title: string}) {
+import SignOutButton from "./SignOutButton";
+
+export default function Navbar({title, showSignOut = true} : {title: string, showSignOut? : boolean}) {
     return (
         <nav className="fixed top-0 z-50 w-full border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         <div className="p-3 lg:px-5 lg:pl-3">
@@ -34,22 +36,15 @@ export default function Navbar({title} : {title: string}) {
                 </span>
               </div>
             </div>
+            {showSignOut && (
             <div className="flex items-center">
               <div className="ms-3 flex items-center">
                 <div className="text-gray-800 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-white">
-                  <button
-                    type="button"
-                    className="flex font-semibold"
-                  >
-                    <svg className="mr-1 size-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
-</svg>
-
-                    Sign Out
-                  </button>
+                  <SignOutButton />
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
       </nav>
