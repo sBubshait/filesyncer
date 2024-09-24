@@ -34,10 +34,10 @@ interface FolderData {
 
 interface FileFolderData {
   fileID: string;
-  name: string;
   type: string;
+  name: string;
   extension: string;
-  size: number;
+  size?: number;
   modifiedAt?: string;
 }
 
@@ -100,11 +100,11 @@ export async function getAllFolders(): Promise<FolderData[]> {
   return rows as FolderData[];
 }
 
-export async function getHomeFolders(): Promise<FolderData[]> {
-  const query = "SELECT * FROM folders WHERE parentFolderID IS NULL";
+export async function getHomeFolders(): Promise<FileFolderData[]> {
+  const query = "SELECT folderID as fileID, folderName as name, 'folder' as type, '' as extension, 0 as size, createdAt as modifiedAt FROM folders WHERE parentFolderID IS NULL";
   const [rows] = await pool.execute<RowDataPacket[]>(query);
 
-  return rows as FolderData[];
+  return rows as FileFolderData[];
 }
 
 export async function createFolder(folderData: FolderData): Promise<void> {
@@ -133,12 +133,12 @@ export async function updateFolderParent(
   await pool.execute(query, [parentFolderID, folderID]);
 }
 
-export async function getRecentFiles(): Promise<FileData[]> {
-  const query = "SELECT * FROM files ORDER BY modifiedAt DESC";
+export async function getRecentFiles(): Promise<FileFolderData[]> {
+  const query = "SELECT fileID, fileName as name, 'file' as type, fileType as extension, size, modifiedAt FROM files ORDER BY modifiedAt DESC LIMIT 5";
   const [rows] = await pool.execute<RowDataPacket[]>(query);
 
-  return rows as FileData[];
-}
+  return rows as FileFolderData[];
+  }
 
 export async function getFavouriteFiles(): Promise<FileFolderData[]> {
   const query = `
