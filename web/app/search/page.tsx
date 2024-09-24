@@ -6,7 +6,7 @@ import Sidebar from "../components/Sidebar";
 import { sidebarItems } from "../sidebar";
 import { Suspense } from "react";
 // import SearchResultsSkeleton from "../components/SearchResultsSkeleton";
-// import SearchResults from "../components/SearchResults";
+import SearchResults from "../components/SearchResults";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -70,9 +70,9 @@ export default function Home() {
           </div>
         </form>
 
-        {/* <Suspense fallback={<SearchResultsSkeleton />}> */}
-          {/* <SearchResults query={searchQuery} /> */}
-        {/* </Suspense> */}
+        <Suspense fallback={<div>Loading ... </div>}>
+          <SearchResults query={searchQuery} />
+         </Suspense>
       </div>
     </>
   );

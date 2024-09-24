@@ -15,3 +15,9 @@ export const getFolder = async (folderID: string): Promise<{ name: string, files
     console.log(json)
     return json;
 }
+
+export const searchFiles = async (query: string): Promise<FileFolder[]> => {
+    const res = await fetch(`${API_URL}/search?query=${encodeURIComponent(query)}`, {cache: "no-store"});
+    const json = await res.json();
+    return json;
+};
