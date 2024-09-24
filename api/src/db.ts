@@ -165,6 +165,17 @@ export async function getFolderFiles(
   return rows as FileFolderData[];
 }
 
+export async function getFolderName(folderID: string): Promise<string | null> {
+  const query = "SELECT folderName FROM folders WHERE folderID = ?";
+  const [rows] = await pool.execute<RowDataPacket[]>(query, [folderID]);
+
+  if ((rows as FolderData[]).length === 0) {
+    return null;
+  }
+
+  return (rows as FolderData[])[0].folderName;
+}
+
 export default {
   findFileByPath,
   addFile,
@@ -177,4 +188,5 @@ export default {
   getRecentFiles,
   getFavouriteFiles,
   getFolderFiles,
+  getFolderName
 };
