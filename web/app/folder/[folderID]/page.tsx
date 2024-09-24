@@ -20,7 +20,7 @@ export default async function Home({
             <Sidebar
               items={sidebarItems}
               storage={{ total: 20, used: 5 }}
-              activeItem="Favourites"
+              activeItem="Other"
             />
             <div className="p-4 sm:ml-64">
               <div className="mt-14"></div>

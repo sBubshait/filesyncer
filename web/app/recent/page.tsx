@@ -3,8 +3,12 @@ import Sidebar from "../components/Sidebar";
 import { sidebarItems } from "../sidebar";
 import FilesCard from "../components/FilesCard";
 import { FileFolder } from "../types";
+import { getSection } from "../api";
 
-export default function Home() {
+
+export default async function Home() {
+  const recentFiles = await getSection("recent");
+
   return (
     <>
     <Navbar title="FileSyncer" />
