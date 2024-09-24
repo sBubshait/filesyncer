@@ -16,9 +16,11 @@ import { FolderIcon, getFileIcon, canViewFile } from "./icons/FileIcons";
 export default function FilesCard({
   title,
   files,
+  extended,
 }: {
   title: string;
   files: FileFolder[];
+  extended?: boolean;
 }) {
   const [openModal, setOpenModal] = useState<string | null>(null);
 
@@ -31,7 +33,7 @@ export default function FilesCard({
   };
 
   return (
-    <div className="mt-5 rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700">
+    <div className={`mt-5 ${extended ? "min-h-[calc(100vh-6rem)]" : ""} rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700`}>
       <h1 className="text-xl font-semibold dark:text-white">{title}</h1>
 
       <div className="mb-2 mt-4 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:xl:grid-cols-5">
@@ -134,8 +136,6 @@ export default function FilesCard({
     </div>
   );
 }
-
-const fileTypeIcon = [{ extensions: ["pdf"], icon: <></> }];
 
 function ModalButton({
   icon,
