@@ -3,8 +3,10 @@ import Sidebar from "../components/Sidebar";
 import { sidebarItems } from "../sidebar";
 import FilesCard from "../components/FilesCard";
 import { FileFolder } from "../types";
+import { getSection } from "../api";
 
-export default function Home() {
+export default async function Home() {
+  const homeFiles = (await getSection("home"));
   return (
     <>
     <Navbar title="FileSyncer" />
@@ -15,45 +17,9 @@ export default function Home() {
         />
         <div className="p-4 sm:ml-64">
           <div className="mt-14"></div>
-          <FilesCard title="All Files" files={recentFiles} extended={true} />
+          <FilesCard title="All Files" files={homeFiles} extended={true} />
           
         </div>
       </>
   );
 }
-
-
-const recentFiles: FileFolder[] = [
-  {
-    fileID: "home/Education",
-    name: "Education",
-    type: "folder",
-    extension: "",
-    size: 0,
-    modifiedAt: "2021-09-01",
-  },
-  {
-    fileID: "home/Work",
-    name: "Work",
-    type: "folder",
-    extension: "",
-    size: 0,
-    modifiedAt: "2021-09-01",
-  },
-  {
-    fileID: "home/welcome.txt",
-    name: "welcome",
-    type: "file",
-    extension: "txt",
-    size: 1024,
-    modifiedAt: "2021-09-01",
-  },
-  {
-    fileID: "home/hello.pdf",
-    name: "hello",
-    type: "file",
-    extension: "pdf",
-    size: 1024,
-    modifiedAt: "2021-09-01",
-  },
-];
