@@ -176,6 +176,18 @@ export async function getFolderName(folderID: string): Promise<string | null> {
   return (rows as FolderData[])[0].folderName;
 }
 
+export async function searchFiles(query: string): Promise<FileFolderData[]> {
+  const searchQuery = `%${query}%`;
+  const queryStr = `
+  SELECT fileID, fileName as name, 'file' as type, fileType as extension, size, modifiedAt FROM files WHERE fileName LIKE ?
+  UNION
+  SELECT folderID as fileID, folderName as name, 'folder' as type, '' as extension, 0 as size, createdAt as modifiedAt FROM folders WHERE folderName LIKE ?`;
+
+  const [rows] = await pool.execute<RowDataPacket[]>(queryStr, [searchQuery, searchQuery]);
+
+  return rows as FileFolderData[];
+}
+
 export default {
   findFileByPath,
   addFile,
@@ -188,5 +200,6 @@ export default {
   getRecentFiles,
   getFavouriteFiles,
   getFolderFiles,
-  getFolderName
+  getFolderName,
+  searchFiles
 };
