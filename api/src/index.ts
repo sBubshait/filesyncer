@@ -189,7 +189,7 @@ app.post('/deleteFile', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/getHome', async (req: Request, res: Response) => {
+app.get('/getSection/home', async (req: Request, res: Response) => {
   try {
     // Find all folders with no parent
     const homeFolders = await db.getHomeFolders();
@@ -199,6 +199,38 @@ app.get('/getHome', async (req: Request, res: Response) => {
     res.status(500).json({ error: true });
   }
 });
+
+app.get('/getSection/recent', async (req: Request, res: Response) => {
+  try {
+    const section = await db.getRecentFiles();
+    res.json(section);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: true });
+  }
+});
+
+app.get('/getSection/favourites', async (req: Request, res: Response) => {
+  try {
+    const section = await db.getFavouriteFiles();
+    res.json(section);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: true });
+  }
+});
+
+app.get('/getFolder/:folderID', async (req: Request, res: Response) => {
+  const { folderID } = req.params;
+  try {
+    const folder = await db.getFolderFiles(folderID);
+    res.json(folder);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: true });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
