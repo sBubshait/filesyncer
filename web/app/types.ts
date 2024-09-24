@@ -2,7 +2,7 @@ export interface SidebarItem {
   name: string;
   icon: React.ReactNode;
   href: string;
-  tag: string | null;
+  tag?: string | null;
 }
 
 export interface FileFolder {

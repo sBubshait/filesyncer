@@ -11,11 +11,11 @@ export default function Home() {
         <Sidebar
           items={sidebarItems}
           storage={{ total: 20, used: 5 }}
-          activeItem="Favourites"
+          activeItem="Recent"
         />
         <div className="p-4 sm:ml-64">
           <div className="mt-14"></div>
-          <FilesCard title="Favourites" files={recentFiles} extended={true} />
+          <FilesCard title="Recent" files={recentFiles} extended={true} />
           
         </div>
       </>
