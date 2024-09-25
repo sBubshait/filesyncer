@@ -228,6 +228,29 @@ app.get('/downloadFile/:fileID', async (req: Request, res: Response) => {
   }
 });
 
+app.post('/toggleFavourite', async (req: Request, res: Response) => {
+  const { fileID } = req.body;
+  try {
+    const file = await db.getFile(fileID);
+    const folder = await db.getFolder(fileID);
+
+    if (!file && !folder) {
+      res.status(404).json({ error: 'File or folder not found' });
+      return;
+    }
+
+    if (file) {
+      await db.toggleFavouriteFile(fileID);
+    } else {
+      await db.toggleFavouriteFolder(fileID);
+    }
+
+    res.json({ toggled: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ toggled: false });
+  }
+});
 
 app.post('/deleteFile', async (req: Request, res: Response) => {
   const { fileID } = req.body;

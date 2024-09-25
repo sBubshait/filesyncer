@@ -199,6 +199,27 @@ export async function getFile(fileID: string): Promise<FileData | null> {
   return (rows as FileData[])[0];
 }
 
+export async function toggleFavouriteFile(fileID: string): Promise<void> {
+  const query = "UPDATE files SET isFavourite = !isFavourite WHERE fileID = ?";
+  await pool.execute(query, [fileID]);
+}
+
+export async function toggleFavouriteFolder(folderID: string): Promise<void> {
+  const query = "UPDATE folders SET isFavourite = !isFavourite WHERE folderID = ?";
+  await pool.execute(query, [folderID]);
+}
+
+export async function getFolder(folderID: string): Promise<FolderData | null> {
+  const query = "SELECT * FROM folders WHERE folderID = ?";
+  const [rows] = await pool.execute<RowDataPacket[]>(query, [folderID]);
+
+  if ((rows as FolderData[]).length === 0) {
+    return null;
+  }
+
+  return (rows as FolderData[])[0];
+}
+
 export default {
   findFileByPath,
   addFile,
@@ -213,5 +234,8 @@ export default {
   getFolderFiles,
   getFolderName,
   searchFiles,
-  getFile
+  getFile,
+  toggleFavouriteFile,
+  toggleFavouriteFolder,
+  getFolder
 };
