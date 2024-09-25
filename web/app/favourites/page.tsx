@@ -17,12 +17,9 @@ export default async function Home() {
         />
         <div className="p-4 sm:ml-64">
           <div className="mt-14"></div>
-          <FilesCard title="Favourites" files={recentFiles} extended={true} />
+          <FilesCard title="Favourites" files={favouriteFiles} extended={true} />
           
         </div>
       </>
   );
 }
-
-
-const recentFiles: FileFolder[] = [];

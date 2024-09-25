@@ -39,3 +39,19 @@ export const searchFiles = async (query: string): Promise<FileFolder[]> => {
     const json = await res.json();
     return json;
 };
+
+export const getDownloadLink = async (fileID: string): Promise<string> => {
+    const res = await fetchWithAuth(`${API_URL}/downloadFile/${fileID}`, {cache: "no-store"});
+    const json = await res.json();
+    return json.link;
+}
+
+export const toggleFavourite = async (fileID: string): Promise<void> => {
+    const res = await fetchWithAuth(`${API_URL}/toggleFavourite`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileID }),
+    });
+}

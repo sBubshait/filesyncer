@@ -15,6 +15,7 @@ import {
 import { FolderIcon, getFileIcon, canViewFile } from "./icons/FileIcons";
 import { TrashIcon } from "./icons/OtherIcons";
 import ModalButton from "./ModalButton";
+import { getDownloadLink, toggleFavourite } from "../lib/apiClient";
 
 export default function FilesCard({
   title,
@@ -47,6 +48,25 @@ export default function FilesCard({
       // Highlight the clicked file
       setHighlighted(file.fileID);
     }
+  };
+
+  const handleDownloadClick = async (fileID: string) => {
+    try {
+      const link = await getDownloadLink(fileID);
+      window.open(link, '_blank');
+    } catch (error) {
+      console.error('Error downloading file', error);
+    }
+    handleCloseModal();
+  };
+
+  const handleFavouriteClick = async (fileID: string) => {
+    try {
+      await toggleFavourite(fileID);
+    } catch (error) {
+      console.error('Error toggling favourite', error);
+    }
+    handleCloseModal();
   };
 
   return (
@@ -138,13 +158,13 @@ export default function FilesCard({
                           <ModalButton
                             icon={<DownloadIcon />}
                             text="Download"
-                            href={`/download/${file.fileID}`}
+                            action={() => handleDownloadClick(file.fileID)}
                           />
 
                           <ModalButton
                             icon={<HeartIcon />}
                             text="Favourite"
-                            action={() => console.log('Favourited')}
+                            action={() => handleFavouriteClick(file.fileID)}
                           />
 
                           <ModalButton
