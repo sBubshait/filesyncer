@@ -11,13 +11,14 @@ const s3 = new AWS.S3({
 
 const bucketName = process.env.AWS_BUCKET_NAME;
 
-export const generateDownloadLink = (fileID: string): string => {
+export const generateDownloadLink = (fileID: string, displayName: string = fileID): string => {
   // Generate a signed URL for the file valid for 1 hour
 
   const params = {
     Bucket: bucketName,
     Key: fileID,
     Expires: 60 * 60,
+    ResponseContentDisposition: 'attachment; filename ="' + displayName + '"'
   };
 
   try {

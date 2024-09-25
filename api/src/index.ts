@@ -220,7 +220,7 @@ app.get('/downloadFile/:fileID', async (req: Request, res: Response) => {
       return;
     }
     
-    const downloadLink = generateDownloadLink(fileID);
+    const downloadLink = generateDownloadLink(fileID, file.fileName + '.' + file.fileType);
     res.json({ link: downloadLink });
   } catch (error) {
     console.error(error);
