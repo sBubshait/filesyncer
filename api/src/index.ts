@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import db from './db.js';
 import { generateToken, authenticateJWT } from './auth.js';
 import cors from 'cors';
+import { generateDownloadLink } from './aws.js';
 
 const app = express();
 app.use(express.json());
@@ -209,6 +210,24 @@ app.get('/getFileID', async (req: Request, res: Response) => {
   const fileID = await db.findFileByPath(pathname as string);
   res.json({ fileID });
 });
+
+app.get('/downloadFile/:fileID', async (req: Request, res: Response) => {
+  const { fileID } = req.params;
+  try {
+    const file = await db.getFile(fileID);
+    if (!file) {
+      res.status(404).json({ error: 'File not found' });
+      return;
+    }
+    
+    const downloadLink = generateDownloadLink(fileID);
+    res.json({ link: downloadLink });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: true });
+  }
+});
+
 
 app.post('/deleteFile', async (req: Request, res: Response) => {
   const { fileID } = req.body;

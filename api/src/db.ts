@@ -188,6 +188,17 @@ export async function searchFiles(query: string): Promise<FileFolderData[]> {
   return rows as FileFolderData[];
 }
 
+export async function getFile(fileID: string): Promise<FileData | null> {
+  const query = "SELECT * FROM files WHERE fileID = ?";
+  const [rows] = await pool.execute<RowDataPacket[]>(query, [fileID]);
+
+  if ((rows as FileData[]).length === 0) {
+    return null;
+  }
+
+  return (rows as FileData[])[0];
+}
+
 export default {
   findFileByPath,
   addFile,
@@ -201,5 +212,6 @@ export default {
   getFavouriteFiles,
   getFolderFiles,
   getFolderName,
-  searchFiles
+  searchFiles,
+  getFile
 };
