@@ -16,7 +16,7 @@ export const DropdownIcon = ({
 );
 
 // ViewIcon
-export const ViewIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+export const ViewIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
     aria-hidden="true"
@@ -34,7 +34,7 @@ export const ViewIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
 
 // DownloadIcon
 export const DownloadIcon = ({
-  className = "w-6 h-6",
+  className
 }: {
   className?: string;
 }) => (
@@ -60,7 +60,7 @@ export const DownloadIcon = ({
 
 // HeartIcon
 export const HeartIcon = ({
-  className = "w-6 h-6",
+  className
 }: {
   className?: string;
 }) => (
@@ -77,7 +77,7 @@ export const HeartIcon = ({
 
 // DeleteIcon
 export const DeleteIcon = ({
-  className = "w-6 h-6",
+  className
 }: {
   className?: string;
 }) => (
