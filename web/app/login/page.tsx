@@ -1,9 +1,11 @@
 "use client"; 
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
+import Cookies from 'js-cookie';
+
+const API_URL = 'http://localhost:3000';
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -14,17 +16,27 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const result = await signIn("credentials", {
-      redirect: false,
-      username,
-      password,
-    });
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const json = await res.json();
 
-    if (result?.error) {
-      setError("Invalid credentials");
-    } else {
-      router.push("/");
+      if (res.ok && json.token) {
+        Cookies.set('token', json.token, { expires: 1 });
+        router.push("/");
+      } else {
+        setError("Invalid username or password");
+      }
+    } catch (error) {
+      console.error(error);
+      setError("An error occurred while logging in. Please try again.");
     }
+
   };
 
   return (

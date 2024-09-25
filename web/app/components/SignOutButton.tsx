@@ -1,13 +1,22 @@
-"use client"; // Ensure this runs on the client
+"use client";
 
-import { signOut } from "next-auth/react";
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 export default function SignOutButton() {
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    Cookies.remove('token');
+
+    router.push('/login');
+  };
+
   return (
     <button
       type="button"
       className="flex font-semibold"
-      onClick={() => signOut()}
+      onClick={handleSignOut}
     >
       <svg
         className="mr-1 size-6"

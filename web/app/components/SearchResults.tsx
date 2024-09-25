@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { FileFolder } from "../types";
 import FilesCard from "./FilesCard";
-import { searchFiles } from "../api";
+import { searchFiles } from "../lib/apiClient";
 import SearchResultsFilesCard from "./SearchResultsFilesCard";
 
 export default function SearchResults({ query }: { query: string }) {

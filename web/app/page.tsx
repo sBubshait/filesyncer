@@ -4,7 +4,7 @@ import Sidebar from "./components/Sidebar";
 import { sidebarItems } from "./sidebar";
 import FilesCard from "./components/FilesCard";
 import { FileFolder } from "./types";
-import { getSection } from "./api";
+import { getSection } from "./lib/api";
 
 export default async function Home() {
   const recentFiles: FileFolder[] = (await getSection("recent"));

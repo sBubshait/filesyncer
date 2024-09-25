@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { sidebarItems } from "../sidebar";
 import { Suspense } from "react";
-// import SearchResultsSkeleton from "../components/SearchResultsSkeleton";
 import SearchResults from "../components/SearchResults";
 
 export default function Home() {

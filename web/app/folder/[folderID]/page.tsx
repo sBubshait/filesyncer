@@ -3,7 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import { sidebarItems } from "../../sidebar";
 import FilesCard from "../../components/FilesCard";
 import { FileFolder } from "../../types";
-import { getFolder } from "../../api";
+import { getFolder } from "../../lib/api";
 
 export default async function Home({
   params,
