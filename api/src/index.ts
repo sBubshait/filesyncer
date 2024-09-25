@@ -2,9 +2,15 @@ import express, { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import db from './db.js';
 import { generateToken, authenticateJWT } from './auth.js';
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
+
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 
 const credentials = {
   username: process.env.USERNAME,
