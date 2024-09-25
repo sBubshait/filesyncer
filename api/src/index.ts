@@ -1,9 +1,35 @@
 import express, { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import db from './db.js';
+import { generateToken, authenticateJWT } from './auth.js';
 
 const app = express();
 app.use(express.json());
+
+const credentials = {
+  username: process.env.USERNAME,
+  password: process.env.PASSWORD,
+};
+
+app.use((req, res, next) => {
+  if (req.path === '/login') {
+    return next();
+  }
+  authenticateJWT(req, res, next);
+});
+
+
+app.post('/login', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  if (username !== credentials.username || password !== credentials.password) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  const token = generateToken({ id: 1, username: credentials.username });
+
+  return res.json({ token });
+});
 
 app.post('/addFile', async (req: Request, res: Response) => {
   const { pathname, size } = req.body;
