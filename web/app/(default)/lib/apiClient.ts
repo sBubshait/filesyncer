@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 
 export const API_URL = 'http://localhost:3000';
+export const WS_URL = 'ws://localhost:3000';
+
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
