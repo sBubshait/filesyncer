@@ -57,7 +57,7 @@ export default function FilesCard({
           setFiles((prevFiles) => [data.file, ...prevFiles]);
         else 
           setFiles((prevFiles) => [...prevFiles, data.file]);
-        
+
       } else if (data.action === "deleteFile") {
         setFiles((prevFiles) =>
           prevFiles.filter((file) => file.fileID !== data.fileID),
@@ -196,6 +196,13 @@ export default function FilesCard({
                               : "md:grid-cols-3"
                           } gap-4 p-4 sm:grid-cols-2 md:p-5`}
                         >
+
+                          <ModalButton
+                            icon={<ViewIcon />}
+                            text="View"
+                            href={`/view/${file.fileID}`}
+                          />
+
                           <ModalButton
                             icon={<DownloadIcon />}
                             text="Download"
