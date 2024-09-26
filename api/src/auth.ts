@@ -27,6 +27,6 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
     const decoded = verifyToken(token);
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Forbidden: Invalid token' });
+    return res.status(401).json({ error: 'Forbidden: Invalid token' });
   }
 }
