@@ -1,7 +1,4 @@
-import { SidebarItem } from "./types.js";
-
-// Icons:
-const HomeIcon = (
+export const HomeIcon = (
   <svg
     className="size-5"
     aria-hidden="true"
@@ -19,7 +16,7 @@ const HomeIcon = (
   </svg>
 );
 
-const FilesIcon = (
+export const FilesIcon = (
   <svg
     className="size-5"
     aria-hidden="true"
@@ -37,7 +34,7 @@ const FilesIcon = (
   </svg>
 );
 
-const HeartIcon = (
+export const HeartIcon = (
   <svg
     className="size-5"
     aria-hidden="true"
@@ -51,7 +48,7 @@ const HeartIcon = (
   </svg>
 );
 
-const SettingsIcon = (
+export const SettingsIcon = (
   <svg
     className="size-5"
     aria-hidden="true"
@@ -69,7 +66,7 @@ const SettingsIcon = (
   </svg>
 );
 
-const ClockIcon = (
+export const ClockIcon = (
   <svg
     className="size-5"
     aria-hidden="true"
@@ -85,23 +82,21 @@ const ClockIcon = (
   </svg>
 );
 
-const SearchIcon = (
+export const SearchIcon = (
   <svg
-  className="size-5"
-  aria-hidden="true"
-  xmlns="http://www.w3.org/2000/svg"
-  width={24}
-  height={24}
-  fill="currentColor"
-  viewBox="0 0 24 24"
->
-  <path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z" />
-  <path
-    fillRule="evenodd"
-    d="M21.707 21.707a1 1 0 0 1-1.414 0l-3.5-3.5a1 1 0 0 1 1.414-1.414l3.5 3.5a1 1 0 0 1 0 1.414Z"
-    clipRule="evenodd"
-  />
-</svg>
+    className="size-5"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    width={24}
+    height={24}
+    fill="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z" />
+    <path
+      fillRule="evenodd"
+      d="M21.707 21.707a1 1 0 0 1-1.414 0l-3.5-3.5a1 1 0 0 1 1.414-1.414l3.5 3.5a1 1 0 0 1 0 1.414Z"
+      clipRule="evenodd"
+    />
+  </svg>
 );
-
-// website sidebar items

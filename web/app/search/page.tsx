@@ -1,10 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import { sidebarItems } from "../sidebar";
-import { Suspense } from "react";
 import SearchResults from "../components/SearchResults";
 
 export default function Home() {
@@ -18,12 +14,6 @@ export default function Home() {
 
   return (
     <>
-      <Navbar title="FileSyncer" />
-      <Sidebar
-        items={sidebarItems}
-        storage={{ total: 20, used: 5 }}
-        activeItem="Search"
-      />
       <div className="p-4 sm:ml-64">
         <div className="mt-14"></div>
         <form className="mx-auto max-w-md" onSubmit={handleSubmit}>
