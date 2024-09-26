@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "../components/Navbar";
 import Cookies from 'js-cookie';
 
 const API_URL = 'http://localhost:3000';
@@ -41,7 +40,6 @@ export default function LoginPage() {
 
   return (
     <>
-    <Navbar title="FileSyncer" showSignOut={false}/>
     <div className="flex h-screen items-center justify-center">
       <form onSubmit={handleLogin} className="w-full max-w-xs">
         <h1 className="mb-4 text-2xl">Login</h1>

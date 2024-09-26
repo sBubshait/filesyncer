@@ -33,12 +33,10 @@ const sidebarItems: {
 export default function DashboardLayout({
   title,
   storage,
-  showSignOut = true,
   children,
 }: {
   title: string;
   storage: { total: number; used: number };
-  showSignOut?: boolean;
   children?: React.ReactNode;
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -84,7 +82,7 @@ export default function DashboardLayout({
                 </span>
               </div>
             </div>
-            {showSignOut && (
+
               <div className="flex items-center">
                 <div className="ms-3 flex items-center">
                   <div className="text-gray-800 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-white">
@@ -92,7 +90,7 @@ export default function DashboardLayout({
                   </div>
                 </div>
               </div>
-            )}
+              
           </div>
         </div>
       </nav>
