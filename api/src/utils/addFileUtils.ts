@@ -1,6 +1,6 @@
 // Helper functions for adding files
 import { v4 as uuidv4 } from "uuid";
-import db from "../db.js";
+import db from "../db/db.js";
 
 
 export const findMostSimilarFolder = async (folderPath: string) => {

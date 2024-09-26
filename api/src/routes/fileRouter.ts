@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
-import db from "../db.js";
+import db from "../db/db.js";
 import { findMostSimilarFolder, linkFolders } from "../utils/addFileUtils.js";
 import { generateDownloadLink } from "../aws.js"
 import { broadcastMessage } from "../websocket.js";
