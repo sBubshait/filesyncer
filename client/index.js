@@ -7,6 +7,7 @@ import fs from 'fs';
 import ora from 'ora';
 import path from 'path';
 import os from 'os';
+import { authenticateCredentials } from './src/db.js';
 import { S3Client, ListObjectsCommand } from "@aws-sdk/client-s3";
 import { execSync } from 'child_process';
 
@@ -107,10 +108,41 @@ if (config.hasBeenSetup) {
     });
 }
 
-
-
-
 const startSetup = async () => {
+    const { username, password } = await inquirer.prompt([
+        {
+            name: 'username',
+            type: 'input',
+            message: 'Enter your FileSyncer username',
+            validate: value => value.length ? true : 'Please enter your FileSyncer username.',
+        },
+        {
+            name: 'password',
+            type: 'password',
+            message: 'Enter your FileSyncer password',
+            validate: value => value.length ? true : 'Please enter your FileSyncer password.',
+        },
+    ]);
+
+    let spinner = ora('Validating credentials...').start();
+
+    try {
+        const token = await authenticateCredentials(username, password);
+
+        if (!token) {
+            spinner.fail('Cannot validate credentials. Please check your login details.');
+            return;
+        }
+
+        spinner.succeed('Credentials validated!');
+        let envContent = `USERNAME=${username}\nPASSWORD=${password}\n`;
+        fs.appendFileSync(envFilePath, envContent);
+
+    } catch (error) {
+        spinner.fail('Error validating credentials. Please check your login details.');
+        return;
+    }
+
     const { accessKeyId, secretAccessKey, bucketName, Region } = await inquirer.prompt([
         {
             name: 'accessKeyId',
@@ -138,7 +170,7 @@ const startSetup = async () => {
         },
     ]);
 
-    const spinner = ora('Validating AWS credentials...').start();
+    spinner = ora('Validating AWS credentials...').start();
 
    
     try {
@@ -149,10 +181,11 @@ const startSetup = async () => {
         }
 
         spinner.succeed('AWS credentials validated!');
+
         console.log("Syncing has started!");
 
-        let envContent = `AWS_ACCESS_KEY_ID=${accessKeyId}\nAWS_SECRET_ACCESS_KEY=${secretAccessKey}\nAWS_BUCKET_NAME=${bucketName}\nAWS_REGION=${Region}`;
-        fs.writeFileSync(envFilePath, envContent);
+        let envContent = `AWS_ACCESS_KEY_ID=${accessKeyId}\nAWS_SECRET_ACCESS_KEY=${secretAccessKey}\nAWS_BUCKET_NAME=${bucketName}\nAWS_REGION=${Region}\n`;
+        fs.appendFileSync(envFilePath, envContent);
         config.foldersToWatch = [];
 
         updateConfig();
@@ -166,7 +199,7 @@ const startSetup = async () => {
 const addDirectory = async () => {
     let absFolderPath;
     const { folderPath } = await inquirer.prompt([
-        {
+        {   
             name: 'folderPath',
             type: 'input',
             message: 'Enter the folder path to sync (shortcuts: Desktop, Documents, Downloads, Home): [e.g. Desktop/MyFolder]',
