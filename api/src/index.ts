@@ -1,17 +1,41 @@
-import express, { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
-import db from './db.js';
-import { generateToken, authenticateJWT } from './auth.js';
-import cors from 'cors';
-import { generateDownloadLink } from './aws.js';
+import express, { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
+import db from "./db.js";
+import { generateToken, authenticateJWT } from "./auth.js";
+import cors from "cors";
+import { generateDownloadLink } from "./aws.js";
+import { WebSocketServer } from "ws";
 
 const app = express();
 app.use(express.json());
 
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+const wss = new WebSocketServer({ server });
+
+wss.on("connection", (ws) => {
+  console.log("New client connected");
+
+  ws.on("message", (message) => {
+    console.log(`Server Received message`);
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+
+  ws.send(JSON.stringify({ message: "Welcome from server :)" }));
+});
 
 const credentials = {
   username: process.env.USERNAME,
@@ -19,18 +43,17 @@ const credentials = {
 };
 
 app.use((req, res, next) => {
-  if (req.path === '/login') {
+  if (req.path === "/login") {
     return next();
   }
   authenticateJWT(req, res, next);
 });
 
-
-app.post('/login', async (req: Request, res: Response) => {
+app.post("/login", async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   if (username !== credentials.username || password !== credentials.password) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 
   const token = generateToken({ id: 1, username: credentials.username });
@@ -38,7 +61,7 @@ app.post('/login', async (req: Request, res: Response) => {
   return res.json({ token });
 });
 
-app.post('/addFile', async (req: Request, res: Response) => {
+app.post("/addFile", async (req: Request, res: Response) => {
   const { pathname, size } = req.body;
 
   if (!pathname) {
@@ -46,11 +69,13 @@ app.post('/addFile', async (req: Request, res: Response) => {
     return;
   }
 
-  const fileParts = pathname.substring(pathname.lastIndexOf('/') + 1).split('.');
+  const fileParts = pathname
+    .substring(pathname.lastIndexOf("/") + 1)
+    .split(".");
   const filename = fileParts[0];
-  const fileType = fileParts.length > 1 ? fileParts[1] : '';
-  const parentFolderPath = pathname.substring(0, pathname.lastIndexOf('/'));
-  const parentFolderName = parentFolderPath.split('/').pop();
+  const fileType = fileParts.length > 1 ? fileParts[1] : "";
+  const parentFolderPath = pathname.substring(0, pathname.lastIndexOf("/"));
+  const parentFolderName = parentFolderPath.split("/").pop();
 
   // Check if the file already exists
   const fileExists = await db.findFileByPath(pathname);
@@ -58,21 +83,22 @@ app.post('/addFile', async (req: Request, res: Response) => {
     res.json({ added: false, fileID: fileExists });
     return;
   }
-  
+
   try {
     let parentFolder = await db.findFolderByPath(parentFolderPath);
-    
+
     if (!parentFolder) {
       // We need to create the parentFolder. But first, we may need to create
       // and link any ancestor/descendant folders to this to-be-created
       // folder. E.g., if we already have a/ then if we add a/b/c.txt, we need to
       // link c to be the parent of b.
 
-      // We can't have both mostSimilarAncestor and mostSimilarDescendant as then we'd have 
-      // the parent folder already created and linked, but this is not the case. So, at least 
+      // We can't have both mostSimilarAncestor and mostSimilarDescendant as then we'd have
+      // the parent folder already created and linked, but this is not the case. So, at least
       // one of the two is null. Hence, we use one function to get this 'most similar' folder.
 
-      const { mostSimilarFolderPath, mostSimilarFolderID, isAncestor } = await findMostSimilarFolder(parentFolderPath);
+      const { mostSimilarFolderPath, mostSimilarFolderID, isAncestor } =
+        await findMostSimilarFolder(parentFolderPath);
 
       // Now create the folder
       const newFolderID = uuidv4();
@@ -87,14 +113,30 @@ app.post('/addFile', async (req: Request, res: Response) => {
 
       // Link the parent folder to its most similar ancestor/descendant
       if (mostSimilarFolderID && mostSimilarFolderPath) {
-        console.log("linking" + mostSimilarFolderPath + " to " + parentFolderPath + " isAncestor: " + isAncestor);
+        console.log(
+          "linking" +
+            mostSimilarFolderPath +
+            " to " +
+            parentFolderPath +
+            " isAncestor: " +
+            isAncestor
+        );
         if (isAncestor)
-          await linkFolders({folderID: mostSimilarFolderID, folderPath: mostSimilarFolderPath}, {folderID: newFolderID, folderPath: parentFolderPath});
+          await linkFolders(
+            {
+              folderID: mostSimilarFolderID,
+              folderPath: mostSimilarFolderPath,
+            },
+            { folderID: newFolderID, folderPath: parentFolderPath }
+          );
         else
-          await linkFolders({folderID: newFolderID, folderPath: parentFolderPath}, {folderID: mostSimilarFolderID, folderPath: mostSimilarFolderPath});
+          await linkFolders(
+            { folderID: newFolderID, folderPath: parentFolderPath },
+            { folderID: mostSimilarFolderID, folderPath: mostSimilarFolderPath }
+          );
       }
     }
-    
+
     // At this point, we have the parent folder created and linked to its ancestor/descendant if there are any.
     // We can now add the file.
 
@@ -107,9 +149,20 @@ app.post('/addFile', async (req: Request, res: Response) => {
       fileType,
       filePath: pathname,
     });
-    
-    res.json({ added: true, fileID });
 
+    broadcastMessage({
+      action: "addFile",
+      folder: parentFolder,
+      file: {
+        fileID,
+        name: filename,
+        extension: fileType,
+        size,
+        modifiedAt: new Date().toISOString(),
+      },
+    });
+
+    res.json({ added: true, fileID });
   } catch (error) {
     console.error(error);
     res.status(500).json({ added: false });
@@ -122,37 +175,50 @@ const findMostSimilarFolder = async (folderPath: string) => {
   let isAncestor = null;
 
   const allFolders = await db.getAllFolders();
-  const folderPathPartsCount = folderPath.split('/').length;
+  const folderPathPartsCount = folderPath.split("/").length;
   let maxCommonPathLength = 0;
 
-  allFolders.forEach(folder => {
+  allFolders.forEach((folder) => {
     const currentFolderPath = folder.folderPath;
-    const currentFolderPathPartsCount = currentFolderPath.split('/').length;
+    const currentFolderPathPartsCount = currentFolderPath.split("/").length;
 
     let commonPathLength = 0;
 
-    if (folderPath.startsWith(currentFolderPath) && folderPathPartsCount > currentFolderPathPartsCount) {
-      console.log("currentFolderPath: " + currentFolderPath + " folderPath: " + folderPath);
+    if (
+      folderPath.startsWith(currentFolderPath) &&
+      folderPathPartsCount > currentFolderPathPartsCount
+    ) {
+      console.log(
+        "currentFolderPath: " + currentFolderPath + " folderPath: " + folderPath
+      );
       // currentFolderPath is a *true* (not a sibling) ancestor of folderPath
       commonPathLength = currentFolderPath.length;
       // prioritize the closest ancestor if multiple
       if (
         commonPathLength > maxCommonPathLength ||
-        (commonPathLength === maxCommonPathLength && mostSimilarFolderPath !== null && currentFolderPathPartsCount > mostSimilarFolderPath.split('/').length)
+        (commonPathLength === maxCommonPathLength &&
+          mostSimilarFolderPath !== null &&
+          currentFolderPathPartsCount > mostSimilarFolderPath.split("/").length)
       ) {
         maxCommonPathLength = commonPathLength;
         mostSimilarFolderPath = currentFolderPath;
         mostSimilarFolderID = folder.folderID;
         isAncestor = true;
       }
-
-    } else if (currentFolderPath.startsWith(folderPath) && currentFolderPathPartsCount > folderPathPartsCount) {
-      console.log("currentFolderPath: " + currentFolderPath + " folderPath: " + folderPath);
+    } else if (
+      currentFolderPath.startsWith(folderPath) &&
+      currentFolderPathPartsCount > folderPathPartsCount
+    ) {
+      console.log(
+        "currentFolderPath: " + currentFolderPath + " folderPath: " + folderPath
+      );
       // folderPath is a *true* (not a sibling) ancestor of currentFolderPath
       commonPathLength = folderPath.length;
       if (
         commonPathLength > maxCommonPathLength ||
-        (commonPathLength === maxCommonPathLength && mostSimilarFolderPath !== null && currentFolderPathPartsCount < mostSimilarFolderPath.split('/').length)
+        (commonPathLength === maxCommonPathLength &&
+          mostSimilarFolderPath !== null &&
+          currentFolderPathPartsCount < mostSimilarFolderPath.split("/").length)
       ) {
         maxCommonPathLength = commonPathLength;
         mostSimilarFolderPath = currentFolderPath;
@@ -161,30 +227,36 @@ const findMostSimilarFolder = async (folderPath: string) => {
       }
     }
   });
-  
+
   return { mostSimilarFolderPath, mostSimilarFolderID, isAncestor };
 };
 
-/** 
+/**
  * Links two folders together. Creates all intermediate folders if they don't exist and links them appropriately.
  * Precondition: ancestorPath is the closest ancestor of descendantPath in the database or vice versa.
  */
-const linkFolders = async (ancestor: {folderID: string, folderPath: string}, descendant: {folderID: string, folderPath: string}) => {
+const linkFolders = async (
+  ancestor: { folderID: string; folderPath: string },
+  descendant: { folderID: string; folderPath: string }
+) => {
   try {
     const { folderID: ancestorID, folderPath: ancestorPath } = ancestor;
     const { folderID: descendantID, folderPath: descendantPath } = descendant;
 
-    const ancestorParts = ancestorPath.split('/');
-    const descendantParts = descendantPath.split('/');
+    const ancestorParts = ancestorPath.split("/");
+    const descendantParts = descendantPath.split("/");
 
     let currentFolderID = ancestorID;
     let currentFolderPath = ancestorPath;
 
-    let pathParts = descendantParts.slice(ancestorParts.length, descendantParts.length - 1);
+    let pathParts = descendantParts.slice(
+      ancestorParts.length,
+      descendantParts.length - 1
+    );
 
     for (const part of pathParts) {
       currentFolderPath += `/${part}`;
-      // currentFolderPath does not exist in the database as otherwise it would be the most similar folder. 
+      // currentFolderPath does not exist in the database as otherwise it would be the most similar folder.
 
       const newFolderID = uuidv4();
       await db.createFolder({
@@ -199,28 +271,30 @@ const linkFolders = async (ancestor: {folderID: string, folderPath: string}, des
 
     // Finally link the descendant to the last created / existing folder.
     await db.updateFolderParent(descendantID, currentFolderID);
-
   } catch (error) {
-    console.error('Error linking folders:', error);  
+    console.error("Error linking folders:", error);
   }
 };
 
-app.get('/getFileID', async (req: Request, res: Response) => {
+app.get("/getFileID", async (req: Request, res: Response) => {
   const { pathname } = req.query;
   const fileID = await db.findFileByPath(pathname as string);
   res.json({ fileID });
 });
 
-app.get('/downloadFile/:fileID', async (req: Request, res: Response) => {
+app.get("/downloadFile/:fileID", async (req: Request, res: Response) => {
   const { fileID } = req.params;
   try {
     const file = await db.getFile(fileID);
     if (!file) {
-      res.status(404).json({ error: 'File not found' });
+      res.status(404).json({ error: "File not found" });
       return;
     }
-    
-    const downloadLink = generateDownloadLink(fileID, file.fileName + '.' + file.fileType);
+
+    const downloadLink = generateDownloadLink(
+      fileID,
+      file.fileName + "." + file.fileType
+    );
     res.json({ link: downloadLink });
   } catch (error) {
     console.error(error);
@@ -228,14 +302,14 @@ app.get('/downloadFile/:fileID', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/toggleFavourite', async (req: Request, res: Response) => {
+app.post("/toggleFavourite", async (req: Request, res: Response) => {
   const { fileID } = req.body;
   try {
     const file = await db.getFile(fileID);
     const folder = await db.getFolder(fileID);
 
     if (!file && !folder) {
-      res.status(404).json({ error: 'File or folder not found' });
+      res.status(404).json({ error: "File or folder not found" });
       return;
     }
 
@@ -252,10 +326,15 @@ app.post('/toggleFavourite', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/deleteFile', async (req: Request, res: Response) => {
+app.post("/deleteFile", async (req: Request, res: Response) => {
   const { fileID } = req.body;
   try {
     await db.deleteFile(fileID);
+
+    broadcastMessage({
+      action: "deleteFile",
+      fileID
+    });
     res.json({ deleted: true });
   } catch (error) {
     console.error(error);
@@ -263,7 +342,7 @@ app.post('/deleteFile', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/getSection/home', async (req: Request, res: Response) => {
+app.get("/getSection/home", async (req: Request, res: Response) => {
   try {
     // Find all folders with no parent
     const homeFolders = await db.getHomeFolders();
@@ -274,7 +353,7 @@ app.get('/getSection/home', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/getSection/recent', async (req: Request, res: Response) => {
+app.get("/getSection/recent", async (req: Request, res: Response) => {
   try {
     const section = await db.getRecentFiles();
     res.json(section);
@@ -284,7 +363,7 @@ app.get('/getSection/recent', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/getSection/favourites', async (req: Request, res: Response) => {
+app.get("/getSection/favourites", async (req: Request, res: Response) => {
   try {
     const section = await db.getFavouriteFiles();
     res.json(section);
@@ -294,12 +373,12 @@ app.get('/getSection/favourites', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/getFolder/:folderID', async (req: Request, res: Response) => {
+app.get("/getFolder/:folderID", async (req: Request, res: Response) => {
   const { folderID } = req.params;
   try {
     const folder = await db.getFolderName(folderID);
     if (!folder) {
-      res.status(404).json({ error: 'Folder not found' });
+      res.status(404).json({ error: "Folder not found" });
       return;
     }
     const files = await db.getFolderFiles(folderID);
@@ -310,11 +389,11 @@ app.get('/getFolder/:folderID', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/search', async (req: Request, res: Response) => {
+app.get("/search", async (req: Request, res: Response) => {
   const { query } = req.query;
 
   if (!query) {
-    res.status(400).json({ error: 'Query parameter is required' });
+    res.status(400).json({ error: "Query parameter is required" });
     return;
   }
 
@@ -327,7 +406,11 @@ app.get('/search', async (req: Request, res: Response) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+function broadcastMessage(message: any) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === client.OPEN) {
+      client.send(JSON.stringify(message));
+    }
+  });
+}
