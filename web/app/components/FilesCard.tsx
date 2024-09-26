@@ -15,7 +15,7 @@ import {
 import { FolderIcon, getFileIcon, canViewFile } from "./icons/FileIcons";
 import { TrashIcon } from "./icons/OtherIcons";
 import ModalButton from "./ModalButton";
-import { getDownloadLink, toggleFavourite } from "../lib/apiClient";
+import { getDownloadLink, toggleFavourite, deleteFile } from "../lib/apiClient";
 
 export default function FilesCard({
   title,
@@ -65,6 +65,15 @@ export default function FilesCard({
       await toggleFavourite(fileID);
     } catch (error) {
       console.error('Error toggling favourite', error);
+    }
+    handleCloseModal();
+  };
+
+  const handleDeleteClick = async (fileID: string) => {
+    try {
+      await deleteFile(fileID);
+    } catch (error) {
+      console.error('Error deleting file', error);
     }
     handleCloseModal();
   };
@@ -147,13 +156,13 @@ export default function FilesCard({
                               : 'md:grid-cols-3'
                           } gap-4 p-4 sm:grid-cols-2 md:p-5`}
                         >
-                          {canViewFile(file.extension) && (
+                          {/* {canViewFile(file.extension) && (
                             <ModalButton
                               icon={<ViewIcon />}
                               text="View"
                               href={`/view/${file.fileID}`}
                             />
-                          )}
+                          )} */}
 
                           <ModalButton
                             icon={<DownloadIcon />}
@@ -170,7 +179,7 @@ export default function FilesCard({
                           <ModalButton
                             icon={<DeleteIcon />}
                             text="Delete"
-                            action={() => console.log('Deleted')}
+                            action={() => handleDeleteClick(file.fileID)}
                           />
                         </div>
                       </div>

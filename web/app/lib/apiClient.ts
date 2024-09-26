@@ -55,3 +55,13 @@ export const toggleFavourite = async (fileID: string): Promise<void> => {
         body: JSON.stringify({ fileID }),
     });
 }
+
+export const deleteFile = async (fileID: string): Promise<void> => {
+    const res = await fetchWithAuth(`${API_URL}/deleteFile`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fileID }),
+    });
+}
