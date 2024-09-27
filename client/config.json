@@ -1,7 +1,7 @@
 {
     "API_URL": "http://localhost:3000",
     "foldersToWatch": [
-        "/Users/bubshait/Desktop/testing2"
+        "/Users/bubshait/Desktop/testing"
     ],
     "hasBeenSetup": true
 }
