@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api
+    ports:
+      - "3000:3000"
+
+  web:
+    build:
+      context: ./web
+    ports:
+      - "3001:3001"
+    environment:
+      - API_URL=http://api:3000

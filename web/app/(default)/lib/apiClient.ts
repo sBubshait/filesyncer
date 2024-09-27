@@ -2,8 +2,8 @@ import { FileFolder } from '../types';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 
-export const API_URL = 'http://localhost:3000';
-export const WS_URL = 'ws://localhost:3000';
+export const API_URL = process.env.API_URL || 'http://localhost:3000';
+export const WS_URL = process.env.WS_URL || 'ws://localhost:3000';
 
 const secret = process.env.NEXTAUTH_SECRET;
 

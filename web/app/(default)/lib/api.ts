@@ -1,7 +1,7 @@
 import { FileFolder } from '../types';
 import { cookies } from 'next/headers';
 
-export const API_URL = 'http://localhost:3000';
+export const API_URL = process.env.API_URL || 'http://localhost:3000';
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {

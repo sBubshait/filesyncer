@@ -9,21 +9,21 @@ export default function Viewer({
   params,
 }: {
   params: {
-    folderID: string;
+    fileID: string;
   };
 }) {
   const fileID = params.fileID || "";
   
-  const [link, setLink] = useState<string | null>(null);
+  const [link, setLink] = useState<string | undefined>(undefined);
   const [mimeType, setMimeType] = useState<string>("");
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     async function fetchLink() {
       const downloadLink = await getDownloadLink(fileID);
       const fileNameURL = extractFileNameFromLink(downloadLink);
       const mimeTypeGot = getMimeType(fileNameURL || "");
-      setFileName(fileNameURL);
+      setFileName(fileNameURL || undefined);
       setMimeType(mimeTypeGot);
       setLink(downloadLink);
     }
@@ -58,32 +58,30 @@ export default function Viewer({
   );
 }
 
-function getMimeType(fileName: string) {
-  const extension = fileName.split(".").pop()!.toLowerCase();
+const mimeTypes: { [key: string]: string } = {
+  bmp: "image/bmp",
+  csv: "text/csv",
+  odt: "application/vnd.oasis.opendocument.text",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  gif: "image/gif",
+  htm: "text/htm",
+  html: "text/html",
+  jpg: "image/jpg",
+  jpeg: "image/jpeg",
+  pdf: "application/pdf",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  tiff: "image/tiff",
+  txt: "text/plain",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  mp4: "video/mp4",
+  webp: "image/webp",
+};
 
-  const mimeTypes = {
-    bmp: "image/bmp",
-    csv: "text/csv",
-    odt: "application/vnd.oasis.opendocument.text",
-    doc: "application/msword",
-    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    gif: "image/gif",
-    htm: "text/htm",
-    html: "text/html",
-    jpg: "image/jpg",
-    jpeg: "image/jpeg",
-    pdf: "application/pdf",
-    png: "image/png",
-    ppt: "application/vnd.ms-powerpoint",
-    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    tiff: "image/tiff",
-    txt: "text/plain",
-    xls: "application/vnd.ms-excel",
-    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    mp4: "video/mp4",
-    webp: "image/webp",
-  };
-
+function getMimeType(extension: keyof typeof mimeTypes): string {
   return mimeTypes[extension] || "application/octet-stream"; // Default if unsupported type
 }
 
