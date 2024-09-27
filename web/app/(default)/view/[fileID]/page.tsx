@@ -23,9 +23,9 @@ export default function Viewer({
       const downloadLink = await getDownloadLink(fileID);
       const fileNameURL = extractFileNameFromLink(downloadLink);
       const mimeTypeGot = getMimeType(fileNameURL || "");
-      setFileName(fileNameURL || undefined);
       setMimeType(mimeTypeGot);
       setLink(downloadLink);
+      setFileName(fileNameURL || undefined);
     }
 
     if (fileID) {
@@ -80,9 +80,14 @@ const mimeTypes: { [key: string]: string } = {
   mp4: "video/mp4",
   webp: "image/webp",
 };
+function getMimeType(filename: string): string {
+  const extension = filename.split('.').pop()?.toLowerCase();
 
-function getMimeType(extension: keyof typeof mimeTypes): string {
-  return mimeTypes[extension] || "application/octet-stream"; // Default if unsupported type
+  if (extension && extension in mimeTypes) {
+    return mimeTypes[extension as keyof typeof mimeTypes];
+  }
+
+  return "application/octet-stream";
 }
 
 function extractFileNameFromLink(link: string): string | null {
