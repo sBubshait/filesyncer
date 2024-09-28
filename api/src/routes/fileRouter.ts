@@ -4,8 +4,26 @@ import db from "../db/db.js";
 import { findMostSimilarFolder, linkFolders } from "../utils/addFileUtils.js";
 import { generateDownloadLink } from "../aws.js"
 import { broadcastMessage } from "../websocket.js";
+import * as dotenv from "dotenv";
+import { convertBytes } from "../utils/sizeConverter.js";
+dotenv.config();
 
 const router = express.Router();
+
+const storageLimit = process.env.STORAGE_LIMIT || 100;
+const storageType = process.env.STORAGE_TYPE || "MB";
+
+router.get("/getOverview", async (req: Request, res: Response) => {
+  const overview = await db.getOverview();
+
+  const storage = {
+    used: convertBytes(overview.storageUsed, storageType),
+    total: storageLimit,
+    type: storageType,
+  }
+
+  res.json({ fileCount: overview.files, favouriteCount: overview.favourites, storage });
+});
 
 router.get("/getFileID", async (req: Request, res: Response) => {
   const { pathname } = req.query;

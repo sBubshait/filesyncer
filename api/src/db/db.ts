@@ -13,7 +13,23 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  multipleStatements: true
 });
+
+// Overview Operation
+export async function getOverview(): Promise<{ files: number; favourites: number; storageUsed: number }> {
+  const query = `
+    SELECT COUNT(*) as files FROM files;
+    SELECT COUNT(*) as favouritesFiles FROM files WHERE isFavourite = 1;
+    SELECT COUNT(*) as favouritesFolders FROM folders WHERE isFavourite = 1;
+    SELECT COALESCE(SUM(size), 0) as storageUsed FROM files;
+  `;
+  const [results] = await pool.query<RowDataPacket[]>(query);
+  const files = results[0][0].files as number;
+  const favourites = results[1][0].favouritesFiles + results[2][0].favouritesFolders;
+  const storageUsed = results[3][0].storageUsed as number;
+  return { files, favourites, storageUsed };
+}
 
 // File Operations
 export async function findFileByPath(filePath: string): Promise<string | null> {
@@ -157,6 +173,7 @@ export async function searchFiles(query: string): Promise<FileFolderData[]> {
 
 // Export as Default Object
 export default {
+  getOverview,
   findFileByPath,
   addFile,
   deleteFile,

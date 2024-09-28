@@ -14,29 +14,17 @@ import {
   SettingsIcon,
 } from "./icons/SidebarIcons";
 
-const sidebarItems: {
-  topItems: SidebarItem[];
-  bottomItems: SidebarItem[];
-} = {
-  topItems: [
-    { name: "Home", href: "/", icon: HomeIcon },
-    { name: "Search", href: "/search", icon: SearchIcon },
-    { name: "All Files", href: "/files", icon: FilesIcon, tag: "9" },
-    { name: "Favourites", href: "/favourites", icon: HeartIcon, tag: "4" },
-    { name: "Recent", href: "/recent", icon: ClockIcon },
-  ],
-  bottomItems: [
-    { name: "Settings", href: "/settings", icon: SettingsIcon, tag: null },
-  ],
-};
-
 export default function DashboardLayout({
   title,
   storage,
+  fileCount,
+  favouriteCount,
   children,
 }: {
   title: string;
-  storage: { total: number; used: number };
+  storage: { total: number; used: number, type: string };
+  fileCount: number;
+  favouriteCount: number;
   children?: React.ReactNode;
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -46,7 +34,22 @@ export default function DashboardLayout({
   };
 
   const pathname = usePathname();
-  console.log(pathname);
+
+  const sidebarItems: {
+    topItems: SidebarItem[];
+    bottomItems: SidebarItem[];
+  } = {
+    topItems: [
+      { name: "Home", href: "/", icon: HomeIcon },
+      { name: "Search", href: "/search", icon: SearchIcon },
+      { name: "All Files", href: "/files", icon: FilesIcon, tag: `${fileCount}` },
+      { name: "Favourites", href: "/favourites", icon: HeartIcon, tag: `${favouriteCount}` },
+      { name: "Recent", href: "/recent", icon: ClockIcon },
+    ],
+    bottomItems: [
+      { name: "Settings", href: "/settings", icon: SettingsIcon, tag: null },
+    ],
+  };
 
   return (
     <div>
@@ -58,7 +61,7 @@ export default function DashboardLayout({
               <button
                 aria-controls="logo-sidebar"
                 type="button"
-                className="inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 sm:hidden"
+                className="inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 sm:hidden dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                 onClick={toggleSidebar}
               >
                 <span className="sr-only">Open sidebar</span>
@@ -77,7 +80,7 @@ export default function DashboardLayout({
                 </svg>
               </button>
               <div className="ms-2 flex md:me-24">
-                <span className="self-center whitespace-nowrap text-xl font-bold dark:text-white sm:text-2xl">
+                <span className="self-center whitespace-nowrap text-xl font-bold sm:text-2xl dark:text-white">
                   {title}
                 </span>
               </div>
@@ -197,7 +200,7 @@ export default function DashboardLayout({
               </div>
 
               <div className="m-2 mt-3 text-xs text-gray-500 dark:text-gray-400">
-                {storage.used} GB of {storage.total} GB used
+                {storage.used} {storage.type} of {storage.total} {storage.type} used
               </div>
             </div>
           </div>

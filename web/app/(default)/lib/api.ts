@@ -20,6 +20,12 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   return res;
 };
 
+export const getOverview = async (): Promise<{ fileCount: number, favouriteCount: number, storage: { used: number, total: number, type: string } }> => {
+    const res = await fetchWithAuth(`${API_URL}/getOverview`, {cache: "no-store"});
+    const json = await res.json();
+    return json;
+}
+
 export const getSection = async (section: string): Promise<FileFolder[]> => {
     const res = await fetchWithAuth(`${API_URL}/getSection/${section}`, {cache: "no-store"});
     const json = await res.json();
@@ -37,3 +43,4 @@ export const searchFiles = async (query: string): Promise<FileFolder[]> => {
     const json = await res.json();
     return json;
 };
+

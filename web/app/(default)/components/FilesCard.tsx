@@ -15,6 +15,7 @@ import { FolderIcon, getFileIcon, canViewFile } from "./icons/FileIcons";
 import { TrashIcon } from "./icons/OtherIcons";
 import ModalButton from "./ModalButton";
 import { getDownloadLink, toggleFavourite, deleteFile } from "../lib/apiClient";
+import { formatFileSize } from "../lib/utils";
 import { WS_URL } from "../lib/apiClient";
 
 export default function FilesCard({
@@ -53,11 +54,8 @@ export default function FilesCard({
         )
           return;
 
-        if (pathname == "/") 
-          setFiles((prevFiles) => [data.file, ...prevFiles]);
-        else 
-          setFiles((prevFiles) => [...prevFiles, data.file]);
-
+        if (pathname == "/") setFiles((prevFiles) => [data.file, ...prevFiles]);
+        else setFiles((prevFiles) => [...prevFiles, data.file]);
       } else if (data.action === "deleteFile") {
         setFiles((prevFiles) =>
           prevFiles.filter((file) => file.fileID !== data.fileID),
@@ -196,7 +194,6 @@ export default function FilesCard({
                               : "md:grid-cols-3"
                           } gap-4 p-4 sm:grid-cols-2 md:p-5`}
                         >
-
                           <ModalButton
                             icon={<ViewIcon />}
                             text="View"
@@ -244,7 +241,8 @@ export default function FilesCard({
                 {file.name}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {file.size} KB {file.extension ? " | " + file.extension : ""}
+                {formatFileSize(file.size!)}{" "}
+                {file.extension ? " | " + file.extension : ""}
               </p>
             </div>
           </div>

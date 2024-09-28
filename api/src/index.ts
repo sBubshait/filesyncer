@@ -1,7 +1,5 @@
-import express, { Request, Response } from "express";
-import { authenticateJWT } from "./utils/auth.js";
+import express from "express";
 import cors from "cors";
-import { WebSocketServer } from "ws";
 import authRoutes from "./routes/authRouter.js";
 import fileRoutes from "./routes/fileRouter.js";
 import folderRoutes from "./routes/folderRouter.js";
