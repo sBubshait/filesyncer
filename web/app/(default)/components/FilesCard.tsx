@@ -10,6 +10,7 @@ import {
   DownloadIcon,
   HeartIcon,
   CloseIcon,
+  UploadIcon,
 } from "./icons/ActionIcons";
 import { FolderIcon, getFileIcon, canViewFile } from "./icons/FileIcons";
 import { TrashIcon } from "./icons/OtherIcons";
@@ -29,7 +30,7 @@ export default function FilesCard({
 }) {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [highlighted, setHighlighted] = useState<string | null>(null);
-  const [files, setFiles] = useState<FileFolder[]>(initialFiles); // Change to state to allow real-time updates
+  const [files, setFiles] = useState<FileFolder[]>(initialFiles);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -124,7 +125,18 @@ export default function FilesCard({
         files.length === 0 ? "grid grid-cols-1" : ""
       } rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700`}
     >
-      <h1 className="text-xl font-semibold dark:text-white">{title}</h1>
+
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <h1 className="text-xl font-semibold dark:text-white">{title}</h1>
+        
+        <button
+          className="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
+        >
+          <UploadIcon className="mr-2 size-4" />
+          Upload Files
+        </button>
+      </div>
+      
       {files.length === 0 && (
         <div className="flex h-full items-center justify-center">
           <TrashIcon className="mr-4 size-12 text-gray-500" />
