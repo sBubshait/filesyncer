@@ -18,12 +18,13 @@ import ModalButton from "./ModalButton";
 import { getDownloadLink, toggleFavourite, deleteFile } from "../lib/apiClient";
 import { formatFileSize } from "../lib/utils";
 import { WS_URL } from "../lib/apiClient";
+import Uploader from "./Uploader";
 
 export default function FilesCard({
   title,
   files: initialFiles,
   extended,
-  allowUpload = false,
+  allowUpload = true,
 }: {
   title: string;
   files: FileFolder[];
@@ -129,7 +130,10 @@ export default function FilesCard({
         <h1 className="text-xl font-semibold dark:text-white">{title}</h1>
 
         {allowUpload && (
-          <button className="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800">
+          <button
+            className="inline-flex items-center justify-center rounded-lg bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
+            onClick={() => setOpenModal("/UPLOAD_FILE")}
+          >
             <UploadIcon className="mr-2 size-4" />
             Upload Files
           </button>
@@ -175,7 +179,7 @@ export default function FilesCard({
 
                 {openModal === file.fileID && (
                   <div
-                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50"
+                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-10"
                     onClick={handleCloseModal}
                   >
                     <div
@@ -227,6 +231,38 @@ export default function FilesCard({
                               action={() => handleDeleteClick(file.fileID)}
                             />
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {openModal === "/UPLOAD_FILE" && (
+                  <div
+                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-10"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) {
+                        handleCloseModal();
+                      }
+                    }}
+                  >
+                    <div className="relative w-full max-w-2xl p-4">
+                      <div className="relative max-h-[calc(100vh-8rem)] overflow-y-auto rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t border-b bg-white p-4 dark:border-gray-600 dark:bg-gray-700 md:p-5">
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            Upload Files
+                          </h3>
+                          <button
+                            type="button"
+                            className="ms-auto inline-flex size-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+                            onClick={handleCloseModal}
+                          >
+                            <CloseIcon />
+                            <span className="sr-only">Close modal</span>
+                          </button>
+                        </div>
+                        <div className="p-4 md:p-5">
+                          <Uploader />
                         </div>
                       </div>
                     </div>
