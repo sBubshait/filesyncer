@@ -3,6 +3,7 @@ import Uppy from "@uppy/core";
 import DashboardPlugin from "@uppy/dashboard";
 import { Dashboard } from "@uppy/react";
 import AwsS3 from "@uppy/aws-s3";
+import Cookies from 'js-cookie';
 
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
@@ -13,7 +14,7 @@ interface UploaderProps {
   allowedFileTypes?: string[];
   maxFileSize?: number;
   maxNumberOfFiles?: number;
-  folder?: string | null;
+  folderID?: string | null;
 }
 
 export default function Uploader({
@@ -21,8 +22,10 @@ export default function Uploader({
   onUploadError,
   maxFileSize = 100 * 1024 * 1024, // 100MB
   maxNumberOfFiles = 10,
-  folder = null,
+  folderID = null,
 }: UploaderProps) {
+  const token = Cookies.get('token');
+
   const uppy = useMemo(() => {
     return new Uppy({
       debug: true,
@@ -36,15 +39,16 @@ export default function Uploader({
       endpoint: "http://localhost:3000",
       getUploadParameters: async (file) => {
         try {
-          const response = await fetch("http://localhost:3000/api/upload/presign", {
+          const response = await fetch("http://localhost:3000/generateUploadLink", {
             method: "POST",
             headers: {
+              "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
               filename: file.name,
               contentType: file.type,
-              folder: folder,
+              folderID: folderID,
             }),
           });
 
@@ -55,8 +59,12 @@ export default function Uploader({
           const data = await response.json();
           return {
             method: "POST",
-            url: data.url,
-            fields: data.fields,
+            url: data.uploadLink.url,
+            fields: {
+              key: data.uploadLink.fields.key,  // Must be first
+              ...data.fields,
+              'Content-Type': file.type,
+            },
           };
         } catch (error) {
           console.error("Error getting upload parameters:", error);
@@ -64,7 +72,7 @@ export default function Uploader({
         }
       },
     });
-  }, [maxFileSize, maxNumberOfFiles, folder]);
+  }, [maxFileSize, maxNumberOfFiles, folderID]);
 
   // Handle successful uploads
   useEffect(() => {
