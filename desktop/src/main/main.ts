@@ -94,6 +94,66 @@ ipcMain.handle('clear-token', async () => {
   }
 });
 
+interface AWSConfig {
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucketName: string;
+  region: string;
+}
+
+// Get AWS config
+ipcMain.handle('get-aws-config', async () => {
+  console.log('get-aws-config');
+  const storage = readStorage();
+  console.log(storage)
+  return storage.awsConfig || null;
+});
+
+// Store AWS config
+ipcMain.handle('store-aws-config', async (_, config: AWSConfig) => {
+  console.log('store-aws-config');
+  try {
+    const storage = readStorage();
+    storage.awsConfig = config;
+    writeStorage(storage);
+    return true;
+  } catch (err) {
+    console.error('Error storing AWS config:', err);
+    throw err;
+  }
+});
+
+ipcMain.handle('validate-aws-config', async (_, config: AWSConfig) => {
+  try {
+    // Make an API call to your backend to test the credentials
+    console.log(JSON.stringify(config));
+    const response = await fetch('http://localhost:3000/validateAWSConfig', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${readStorage().accessToken}`,
+      },
+      body: JSON.stringify(config),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to validate credentials');
+    }
+
+    return {
+      success: data.success,
+    };
+  } catch (error: any) {
+    console.error(error);
+    return {
+      success: false,
+      error: error.message || 'Failed to validate credentials',
+    };
+  }
+});
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();

@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import Main from './Main';
 import AuthenticatedView from './AuthenticatedView';
 import CallbackHandler from './CallbackHandler';
+import ConfigureAWS from './Pages/AWSConfiguration';
 
 import './App.css';
 import 'tailwindcss/tailwind.css';
@@ -36,21 +37,21 @@ function AppRoutes() {
       });
 
     // Listen for token updates
-    const cleanup = window.electron.ipcRenderer.on(
-      'token-updated',
-      (newToken) => {
-        setToken(newToken);
-      },
-    );
+    // const cleanup = window.electron.ipcRenderer.on(
+    //   'token-updated',
+    //   (newToken) => {
+    //     setToken(newToken);
+    //   },
+    // );
 
     return () => {
-      if (cleanup) cleanup();
+      // if (cleanup) cleanup();
     };
   }, []);
 
   useEffect(() => {
     if (!token && location.pathname === '/dashboard') {
-      console.log("Cleared");
+      console.log('Cleared');
       // If token is cleared and we're on dashboard, redirect to home
       window.location.href = '/';
     }
@@ -72,6 +73,10 @@ function AppRoutes() {
       />
       <Route path="/callback" element={<CallbackHandler />} />
       <Route path="/dashboard" element={<AuthenticatedView token={token} />} />
+      <Route
+        path="/configureAWS"
+        element={token ? <ConfigureAWS /> : <Main />}
+      />
     </Routes>
   );
 }

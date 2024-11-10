@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function AuthenticatedView({ token }: { token: string }) {
+export default function AuthenticatedView({ token }: { token: string | null }) {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -10,9 +10,7 @@ export default function AuthenticatedView({ token }: { token: string }) {
       // Clear token from .env and state
       await window.electron.ipcRenderer.invoke('clear-token');
 
-      // Navigate back to main page
-    //   navigate('/', { replace: true });
-        window.location.href = '/';
+      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -30,10 +28,19 @@ export default function AuthenticatedView({ token }: { token: string }) {
         </div>
 
         <button
+          type="button"
           onClick={handleSignOut}
           className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors"
         >
           Sign Out
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/configureAWS')}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors mt-4"
+        >
+          Configure AWS
         </button>
       </div>
     </div>

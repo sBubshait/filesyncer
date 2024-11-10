@@ -2,7 +2,13 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'store-token' | 'get-token' | 'clear-token';
+export type Channels =
+  | 'store-token'
+  | 'get-token'
+  | 'clear-token'
+  | 'get-aws-config'
+  | 'store-aws-config'
+  | 'validate-aws-config';
 
 const electronHandler = {
   ipcRenderer: {
@@ -23,6 +29,9 @@ const electronHandler = {
     },
     invoke: (channel: Channels) => {
       return ipcRenderer.invoke(channel);
+    },
+    invokeWithData: (channel: Channels, data: unknown) => {
+      return ipcRenderer.invoke(channel, data);
     },
   },
 };
