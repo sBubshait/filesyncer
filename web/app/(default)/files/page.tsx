@@ -8,7 +8,7 @@ export default async function Home() {
     <>
         <div className="p-4 sm:ml-64">
           <div className="mt-14"></div>
-          <FilesCard title="All Files" files={homeFiles} extended={true} />
+          <FilesCard title="All Files" files={homeFiles} extended={true} allowUpload={true} />
           
         </div>
       </>
