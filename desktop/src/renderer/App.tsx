@@ -11,6 +11,7 @@ import AuthenticatedView from './AuthenticatedView';
 import CallbackHandler from './CallbackHandler';
 import ConfigureAWS from './Pages/AWSConfiguration';
 import MainPage from './Pages/MainPage';
+import FolderManagementPage from './Pages/FolderPage';
 
 import './App.css';
 import 'tailwindcss/tailwind.css';
@@ -75,6 +76,10 @@ function AppRoutes() {
       <Route
         path="/configureAWS"
         element={token ? <ConfigureAWS /> : <Main />}
+      />
+      <Route
+        path="/folders"
+        element={token ? <FolderManagementPage /> : <Main />}
       />
     </Routes>
   );

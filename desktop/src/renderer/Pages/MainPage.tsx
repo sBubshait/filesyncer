@@ -1,7 +1,14 @@
 // AuthenticatedView.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Square, Settings, LogOut, RefreshCw } from 'lucide-react';
+import {
+  Play,
+  Square,
+  Settings,
+  LogOut,
+  RefreshCw,
+  Folder,
+} from 'lucide-react';
 
 type SyncStatus = 'awaiting_credentials' | 'syncing' | 'stopped';
 type ActionType = 'none' | 'starting' | 'stopping' | 'restarting';
@@ -17,10 +24,12 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
   const [status, setStatus] = useState<SyncStatus>('stopped');
   const [currentAction, setCurrentAction] = useState<ActionType>('none');
   const [awsConfigured, setAwsConfigured] = useState(false);
+  const [folderCount, setFolderCount] = useState<number>(0);
 
   const checkCurrentStatus = async () => {
     try {
-      const hasAwsConfig = await window.electron.ipcRenderer.invoke('get-aws-config');
+      const hasAwsConfig =
+        await window.electron.ipcRenderer.invoke('get-aws-config');
       setAwsConfigured(!!hasAwsConfig);
 
       if (!hasAwsConfig) {
@@ -28,20 +37,33 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
         return;
       }
 
-      const syncStatus = await window.electron.ipcRenderer.invoke('get-sync-status');
+      const syncStatus =
+        await window.electron.ipcRenderer.invoke('get-sync-status');
       setStatus(syncStatus ? 'syncing' : 'stopped');
     } catch (error) {
       console.error('Error checking status:', error);
     }
   };
 
+  const loadFolderCount = async () => {
+    try {
+      const config =
+        await window.electron.ipcRenderer.invoke('get-watch-config');
+      setFolderCount(config.foldersToWatch?.length || 0);
+    } catch (error) {
+      console.error('Error loading folder count:', error);
+    }
+  };
+
   // Status polling
   useEffect(() => {
-    // Initial check
-    checkCurrentStatus();
+    const checkStatus = async () => {
+      await checkCurrentStatus();
+      await loadFolderCount();
+    };
 
-    // Poll every minute
-    const interval = setInterval(checkCurrentStatus, 60000);
+    checkStatus();
+    const interval = setInterval(checkStatus, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -155,11 +177,11 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
         <div className="flex flex-col items-center justify-center gap-8">
           {/* Status Circle */}
           <div className="relative">
-            <div 
+            <div
               className={`w-48 h-48 rounded-full flex items-center justify-center border-4 transition-colors ${
-                isLoading 
-                  ? 'border-blue-500 animate-pulse' 
-                  : status === 'syncing' 
+                isLoading
+                  ? 'border-blue-500 animate-pulse'
+                  : status === 'syncing'
                     ? 'border-green-500'
                     : status === 'awaiting_credentials'
                       ? 'border-yellow-500'
@@ -178,7 +200,9 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
                 {isLoading ? (
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 border-4 border-t-transparent border-blue-500 rounded-full animate-spin mb-2" />
-                    <span className="text-sm text-gray-300">{getActionMessage(currentAction)}</span>
+                    <span className="text-sm text-gray-300">
+                      {getActionMessage(currentAction)}
+                    </span>
                   </div>
                 ) : status === 'syncing' ? (
                   <Square size={48} className="text-white" />
@@ -192,7 +216,9 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
           {/* Status Text */}
           <div className="text-center">
             <h2 className={`text-2xl font-semibold ${statusDetails.color}`}>
-              {isLoading ? getActionMessage(currentAction) : statusDetails.message}
+              {isLoading
+                ? getActionMessage(currentAction)
+                : statusDetails.message}
             </h2>
             {status === 'awaiting_credentials' && (
               <p className="text-gray-400 mt-2">
@@ -201,28 +227,39 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
             )}
           </div>
 
+          {status === 'syncing' && (
+            <p className="text-gray-300" style={{ marginTop: '-1.5rem' }}>
+              Watching {folderCount} folder{folderCount !== 1 ? 's' : ''}
+            </p>
+          )}
+
           {/* Quick Actions */}
           {status === 'syncing' && (
             <div className="bg-gray-800 rounded-lg p-4 mt-4">
-              <h3 className="text-lg font-medium text-white mb-2">Quick Actions</h3>
+              <h3 className="text-lg font-medium text-white mb-2">
+                Quick Actions
+              </h3>
               <div className="flex flex-col items-center space-y-3 mt-4">
                 <button
                   type="button"
-                  onClick={() =>
-                    window.electron.ipcRenderer.invoke('restart-sync')
-                  }
+                  onClick={handleRestartSync}
                   className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
-                  <RefreshCw size={20} />
+                  <RefreshCw
+                    size={20}
+                    className={
+                      currentAction === 'restarting' ? 'animate-spin' : ''
+                    }
+                  />
                   Restart Sync
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/configureAWS')}
-                  className="mt-3 flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  onClick={() => navigate('/folders')}
+                  className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                 >
-                  <Settings size={20} />
-                  Configure AWS
+                  <Folder size={20} />
+                  Manage Folders ({folderCount})
                 </button>
               </div>
             </div>
