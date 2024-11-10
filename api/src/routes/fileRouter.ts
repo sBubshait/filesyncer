@@ -5,25 +5,10 @@ import { findMostSimilarFolder, linkFolders } from "../utils/addFileUtils.js";
 import { generateDownloadLink, generateUploadLink } from "../aws.js"
 import { broadcastMessage } from "../websocket.js";
 import * as dotenv from "dotenv";
-import { convertBytes } from "../utils/sizeConverter.js";
 dotenv.config();
 
 const router = express.Router();
 
-const storageLimit = process.env.STORAGE_LIMIT || 100;
-const storageType = process.env.STORAGE_TYPE || "MB";
-
-router.get("/getOverview", async (req: Request, res: Response) => {
-  const {fileCount, favouriteCount, totalSize} = await db.getOverview();
-
-  const storage = {
-    used: convertBytes(Number(totalSize), storageType),
-    total: storageLimit,
-    type: storageType,
-  }
-
-  res.json({ fileCount, favouriteCount: favouriteCount, storage });
-});
 
 router.post("/addFile", addFile);
 
