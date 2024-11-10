@@ -4,8 +4,10 @@ import db from "../db/index.js";
 const router = express.Router();
 
 router.get("/search", async (req: Request, res: Response) => {
-    const { query } = req.query;
-  
+    const query = Array.isArray(req.query.query) 
+                        ? req.query.query.join(",") 
+                        : req.query.query;
+                      
     if (!query) {
       res.status(400).json({ error: "Query parameter is required" });
       return;

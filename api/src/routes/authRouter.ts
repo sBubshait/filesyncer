@@ -6,21 +6,19 @@ dotenv.config({ path: getEnvPath() });
 
 const router = express.Router();
 
-const credentials = {
-  username: process.env.USERNAME,
-  password: process.env.PASSWORD,
-};
-
 router.post("/login", async (req: Request, res: Response) => {
-    const { username, password } = req.body;
-  
-    if (username !== credentials.username || password !== credentials.password) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-  
-    const token = generateToken({ id: 1, username: credentials.username });
-  
+  const { username, password } = req.body;
+
+  if (username !== process.env.USERNAME || password !== process.env.PASSWORD)
+    return res.status(401).json({ message: "Invalid credentials" });
+
+  try {
+    const token = generateToken({ id: 1, username: username });
     return res.json({ token });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: true });
+  }
 });
 
 export default router;

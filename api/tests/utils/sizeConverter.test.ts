@@ -1,4 +1,4 @@
-import { convertBytes } from '../src/utils/sizeConverter';
+import { convertBytes } from '../../src/utils/sizeConverter.js';
 
 describe('SizeConverter', () => {
 

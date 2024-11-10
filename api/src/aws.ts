@@ -51,8 +51,8 @@ export const generateUploadLink = async (filename: string, contentType: string, 
     // Add file to database first
     await db.addFile({
       fileID: fileID,
-      folderID: folderID,
-      size: 0,
+      folderID: folderID || null,
+      size: 0n,
       fileName: fileName,
       fileType,
       filePath: fileID,
