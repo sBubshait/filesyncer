@@ -13,6 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import fs from 'fs';
+import { execSync } from 'child_process';
 import * as dotenv from 'dotenv';
 import { resolveHtmlPath } from './util';
 import MenuBuilder from './menu';
@@ -105,7 +106,7 @@ interface AWSConfig {
 ipcMain.handle('get-aws-config', async () => {
   console.log('get-aws-config');
   const storage = readStorage();
-  console.log(storage)
+  console.log(storage);
   return storage.awsConfig || null;
 });
 
@@ -151,6 +152,66 @@ ipcMain.handle('validate-aws-config', async (_, config: AWSConfig) => {
       success: false,
       error: error.message || 'Failed to validate credentials',
     };
+  }
+});
+
+// const watchPath = path.join(__dirname, 'watch.js');
+const watchPath =
+  '/Users/bubshait/Desktop/Projects2/FileSyncer-V2/repo/client/src/watch.js';
+
+ipcMain.handle('get-sync-status', async () => {
+  try {
+    const output = execSync('pm2 show filesyncer', {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+
+    return !(
+      output.includes("doesn't exist") ||
+      output.includes('errored') ||
+      output.includes('stopped')
+    );
+  } catch (error) {
+    return false;
+  }
+});
+
+ipcMain.handle('start-sync', async () => {
+  try {
+    execSync(`pm2 start ${watchPath} --name filesyncer`, {
+      stdio: 'inherit',
+    });
+    execSync('pm2 save', { stdio: 'inherit' });
+    const startupScript = execSync('pm2 startup', {
+      stdio: 'inherit',
+    });
+    if (startupScript) {
+      execSync(startupScript.toString(), { stdio: 'inherit' });
+    }
+    return true;
+  } catch (error) {
+    console.error(`Error while starting to watch: ${error}`);
+    throw error;
+  }
+});
+
+ipcMain.handle('stop-sync', async () => {
+  try {
+    execSync('pm2 stop filesyncer', { stdio: 'inherit' });
+    return true;
+  } catch (error) {
+    console.error(`Error while stopping watch: ${error}`);
+    throw error;
+  }
+});
+
+ipcMain.handle('restart-sync', async () => {
+  try {
+    execSync('pm2 restart filesyncer', { stdio: 'inherit' });
+    return true;
+  } catch (error) {
+    console.error(`Error while restarting watch: ${error}`);
+    throw error;
   }
 });
 

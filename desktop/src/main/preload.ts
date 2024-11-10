@@ -8,7 +8,11 @@ export type Channels =
   | 'clear-token'
   | 'get-aws-config'
   | 'store-aws-config'
-  | 'validate-aws-config';
+  | 'validate-aws-config'
+  | 'get-sync-status'
+  | 'start-sync'
+  | 'restart-sync'
+  | 'stop-sync';
 
 const electronHandler = {
   ipcRenderer: {
