@@ -12,8 +12,12 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
+import fs from 'fs';
+import * as dotenv from 'dotenv';
 import { resolveHtmlPath } from './util';
+import MenuBuilder from './menu';
+
+dotenv.config();
 
 class AppUpdater {
   constructor() {
@@ -25,10 +29,69 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+const getStoragePath = () => {
+  return path.join(app.getPath('userData'), 'storage.json');
+};
+
+// Read storage
+const readStorage = () => {
+  try {
+    const storagePath = getStoragePath();
+    if (fs.existsSync(storagePath)) {
+      const data = fs.readFileSync(storagePath, 'utf8');
+      return JSON.parse(data);
+    }
+    return {};
+  } catch (error) {
+    console.error('Error reading storage:', error);
+    return {};
+  }
+};
+
+// Write storage
+const writeStorage = (data: any) => {
+  try {
+    const storagePath = getStoragePath();
+    fs.writeFileSync(storagePath, JSON.stringify(data, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error writing storage:', error);
+    return false;
+  }
+};
+
+// IPC Handlers
+ipcMain.handle('get-token', async () => {
+  console.log('get-token');
+  const storage = readStorage();
+  return storage.accessToken || null;
+});
+
+ipcMain.on('store-token', async (event, token) => {
+  console.log('store-token');
+  try {
+    const storage = readStorage();
+    storage.accessToken = token;
+    writeStorage(storage);
+
+    // Notify renderer of update
+    event.reply('token-updated', token);
+  } catch (err) {
+    console.error('Error storing token:', err);
+  }
+});
+
+ipcMain.handle('clear-token', async () => {
+  console.log('clear-token');
+  try {
+    const storage = readStorage();
+    delete storage.accessToken;
+    writeStorage(storage);
+    return true;
+  } catch (err) {
+    console.error('Error clearing token:', err);
+    throw err;
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -81,7 +144,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.loadURL(resolveHtmlPath('/'));
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
