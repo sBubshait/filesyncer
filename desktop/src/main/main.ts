@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 /**
@@ -15,6 +16,7 @@ import log from 'electron-log';
 import fs from 'fs';
 import { execSync } from 'child_process';
 import * as dotenv from 'dotenv';
+import { AWSConfig } from './env';
 import { resolveHtmlPath } from './util';
 import MenuBuilder from './menu';
 
@@ -32,6 +34,18 @@ let mainWindow: BrowserWindow | null = null;
 
 const getStoragePath = () => {
   return path.join(app.getPath('userData'), 'storage.json');
+};
+
+const getWatcherPath = () => {
+  return path.join(__dirname, '../../src/', 'watcher');
+};
+
+const getWatcherConfigPath = () => {
+  return path.join(getWatcherPath(), 'config.json');
+};
+
+const getEnvPath = () => {
+  return path.join(getWatcherPath(), '.env');
 };
 
 // Read storage
@@ -61,6 +75,45 @@ const writeStorage = (data: any) => {
   }
 };
 
+const updateEnvFile = (updates: Record<string, string | undefined>) => {
+  const envPath = getEnvPath();
+  let envContent = '';
+
+  // Read existing content if file exists
+  try {
+    envContent = fs.readFileSync(envPath, 'utf8');
+  } catch (error) {
+    // File doesn't exist yet, start with empty content
+  }
+
+  // Convert content to key-value pairs
+  const envLines = envContent.split('\n').filter((line) => line.trim());
+  const envVars: Record<string, string> = {};
+
+  envLines.forEach((line) => {
+    const [key, ...valueParts] = line.split('=');
+    if (key) {
+      envVars[key.trim()] = valueParts.join('=').trim();
+    }
+  });
+
+  // Update with new values
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value !== undefined) {
+      envVars[key] = value;
+    } else {
+      delete envVars[key];
+    }
+  });
+
+  // Write back to file
+  const newContent = `${Object.entries(envVars)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n')}\n`;
+
+  fs.writeFileSync(envPath, newContent);
+};
+
 // IPC Handlers
 ipcMain.handle('get-token', async () => {
   console.log('get-token');
@@ -74,7 +127,9 @@ ipcMain.on('store-token', async (event, token) => {
     const storage = readStorage();
     storage.accessToken = token;
     writeStorage(storage);
-
+    updateEnvFile({
+      ACCESS_TOKEN: token,
+    });
     // Notify renderer of update
     event.reply('token-updated', token);
   } catch (err) {
@@ -88,19 +143,16 @@ ipcMain.handle('clear-token', async () => {
     const storage = readStorage();
     delete storage.accessToken;
     writeStorage(storage);
+    updateEnvFile({
+      ACCESS_TOKEN: undefined,
+    });
+
     return true;
   } catch (err) {
     console.error('Error clearing token:', err);
     throw err;
   }
 });
-
-interface AWSConfig {
-  accessKeyId: string;
-  secretAccessKey: string;
-  bucketName: string;
-  region: string;
-}
 
 // Get AWS config
 ipcMain.handle('get-aws-config', async () => {
@@ -116,6 +168,12 @@ ipcMain.handle('store-aws-config', async (_, config: AWSConfig) => {
     const storage = readStorage();
     storage.awsConfig = config;
     writeStorage(storage);
+    updateEnvFile({
+      AWS_ACCESS_KEY_ID: config.accessKeyId,
+      AWS_SECRET_ACCESS_KEY: config.secretAccessKey,
+      AWS_BUCKET_NAME: config.bucketName,
+      AWS_REGION: config.region,
+    });
     return true;
   } catch (err) {
     console.error('Error storing AWS config:', err);
@@ -154,10 +212,6 @@ ipcMain.handle('validate-aws-config', async (_, config: AWSConfig) => {
   }
 });
 
-// const watchPath = path.join(__dirname, 'watch.js');
-const watchPath =
-  '/Users/bubshait/Desktop/Projects2/FileSyncer-V2/repo/client/src/watch.js';
-
 ipcMain.handle('get-sync-status', async () => {
   try {
     const output = execSync('pm2 show filesyncer', {
@@ -177,7 +231,8 @@ ipcMain.handle('get-sync-status', async () => {
 
 ipcMain.handle('start-sync', async () => {
   try {
-    execSync(`pm2 start ${watchPath} --name filesyncer`, {
+    const watcherScript = path.join(getWatcherPath(), 'index.js');
+    execSync(`pm2 start ${watcherScript} --name filesyncer`, {
       stdio: 'inherit',
     });
     execSync('pm2 save', { stdio: 'inherit' });
@@ -214,13 +269,8 @@ ipcMain.handle('restart-sync', async () => {
   }
 });
 
-const getConfigPath = () => {
-  const watchPath = path.join(__dirname, 'watch.js');
-  return path.join(path.dirname(watchPath), 'config.json');
-};
-
 const readConfig = () => {
-  const configPath = getConfigPath();
+  const configPath = getWatcherConfigPath();
   try {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     return config;
@@ -234,7 +284,7 @@ const readConfig = () => {
 };
 
 const writeConfig = (config: any) => {
-  const configPath = getConfigPath();
+  const configPath = getWatcherConfigPath();
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 };
 
@@ -247,7 +297,7 @@ const countFiles = (dirPath: string): number => {
     const stat = fs.statSync(fullPath);
 
     if (stat.isFile()) {
-      count++;
+      count += 1;
     } else if (stat.isDirectory()) {
       count += countFiles(fullPath);
     }
@@ -266,7 +316,7 @@ ipcMain.handle('get-watch-config', async () => {
 ipcMain.handle('select-folder', async () => {
   console.log('select-folder');
   const result = await dialog.showOpenDialog({
-    properties: ['openDirectory']
+    properties: ['openDirectory'],
   });
 
   if (result.canceled || !result.filePaths[0]) {
@@ -289,8 +339,8 @@ ipcMain.handle('show-confirmation', async (_, { message, title }) => {
   const result = await dialog.showMessageBox({
     type: 'question',
     buttons: ['Yes', 'No'],
-    title: title,
-    message: message
+    title,
+    message,
   });
 
   return result.response === 0;
@@ -312,7 +362,7 @@ ipcMain.handle('remove-watch-folder', async (_, folderPath) => {
   console.log('remove-watch-folder');
   const config = readConfig();
   config.foldersToWatch = config.foldersToWatch.filter(
-    (folder: string) => folder !== folderPath
+    (folder: string) => folder !== folderPath,
   );
   writeConfig(config);
   return true;
