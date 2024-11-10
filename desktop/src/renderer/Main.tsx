@@ -1,6 +1,16 @@
-import 'tailwindcss/tailwind.css';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Main() {
+  const navigate = useNavigate();
+  console.log('Main');
+  
+  const handleSignIn = () => {
+    // Redirect to login page with callback URL
+    const callbackUrl = `${window.location.origin}/callback`;
+    window.location.href = `http://localhost:3001/login?callback=${encodeURIComponent(callbackUrl)}`;
+  };
+
   return (
     <header className="min-h-screen bg-gray-900 text-white p-4">
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
@@ -16,7 +26,7 @@ export default function Main() {
         <button
           type="button"
           className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-xl rounded-lg transition-colors"
-          onClick={() => console.log('Sign in clicked')}
+          onClick={handleSignIn}
         >
           Sign In
         </button>
