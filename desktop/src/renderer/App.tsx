@@ -10,6 +10,7 @@ import Main from './Main';
 import AuthenticatedView from './AuthenticatedView';
 import CallbackHandler from './CallbackHandler';
 import ConfigureAWS from './Pages/AWSConfiguration';
+import MainPage from './Pages/MainPage';
 
 import './App.css';
 import 'tailwindcss/tailwind.css';
@@ -67,12 +68,10 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={token ? <AuthenticatedView token={token} /> : <Main />}
-      />
+      <Route path="/" element={token ? <MainPage token={token} /> : <Main />} />
       <Route path="/callback" element={<CallbackHandler />} />
-      <Route path="/dashboard" element={<AuthenticatedView token={token} />} />
+      {/* <Route path="/dashboard" element={<AuthenticatedView token={token} />} /> */}
+      <Route path="/dashboard" element={<MainPage token={token} />} />
       <Route
         path="/configureAWS"
         element={token ? <ConfigureAWS /> : <Main />}
