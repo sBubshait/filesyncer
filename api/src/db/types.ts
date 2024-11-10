@@ -1,27 +1,59 @@
 export interface FileData {
   fileID: string;
-  folderID: string;
+  folderID: string | null;
   fileName: string;
   fileType: string;
   filePath: string;
-  size?: number;
-  createdAt?: string;
-  modifiedAt?: string;
+  size: bigint | null;
+  createdAt?: Date;
+  modifiedAt?: Date;
 }
 
 export interface FolderData {
   folderID: string;
-  parentFolderID?: string;
+  parentFolderID: string | null;
   folderName: string;
   folderPath: string;
-  createdAt?: string;
+  createdAt?: Date;
 }
 
 export interface FileFolderData {
-  fileID: string;
   type: string;
+  fileID: string;
   name: string;
   extension: string;
-  size?: number;
-  modifiedAt?: string;
+  size?: bigint;
+  modifiedAt?: Date;
+}
+
+export interface OverviewData {
+  fileCount: number;
+  favouriteCount: number;
+  totalSize: bigint;
+}
+
+export type GeneralOperations = {
+  getOverview(): Promise<OverviewData>
+  getHomeFiles(): Promise<FileFolderData[]>
+  getRecentFiles(): Promise<FileFolderData[]>
+  getFavouriteFiles(): Promise<FileFolderData[]>
+  search(query: string): Promise<FileFolderData[]>
+}
+
+export type FileOperations = {
+  create(data: FileData): Promise<void>
+  get(id: string): Promise<FileData | null>
+  getByPath(path: string): Promise<string | null>
+  delete(id: string): Promise<void>
+  toggleFavourite(id: string): Promise<void>
+}
+
+export type FolderOperations = {
+  create(data: FolderData): Promise<void>
+  get(id: string): Promise<FolderData | null>
+  getByPath(path: string): Promise<string | null>
+  updateParent(id: string, parentId: string): Promise<void>
+  toggleFavourite(id: string): Promise<void>
+  getName(id: string): Promise<string | null>
+  getContents(id: string): Promise<FileFolderData[]>
 }

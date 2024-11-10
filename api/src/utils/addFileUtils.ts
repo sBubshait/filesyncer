@@ -1,6 +1,6 @@
 // Helper functions for adding files
 import { v4 as uuidv4 } from "uuid";
-import db from "../db/db.js";
+import db from "../db/index.js";
 
 
 export const findMostSimilarFolder = async (folderPath: string) => {
@@ -8,7 +8,7 @@ export const findMostSimilarFolder = async (folderPath: string) => {
   let mostSimilarFolderID = null;
   let isAncestor = null;
 
-  const allFolders = await db.getAllFolders();
+  const allFolders = await db.folder.getAll();
   const folderPathPartsCount = folderPath.split("/").length;
   let maxCommonPathLength = 0;
 
@@ -93,7 +93,7 @@ export const linkFolders = async (
       // currentFolderPath does not exist in the database as otherwise it would be the most similar folder.
 
       const newFolderID = uuidv4();
-      await db.createFolder({
+      await db.folder.create({
         folderID: newFolderID,
         parentFolderID: currentFolderID,
         folderName: part,
@@ -104,7 +104,7 @@ export const linkFolders = async (
     }
 
     // Finally link the descendant to the last created / existing folder.
-    await db.updateFolderParent(descendantID, currentFolderID);
+    await db.folder.updateParent(descendantID, currentFolderID);
   } catch (error) {
     console.error("Error linking folders:", error);
   }

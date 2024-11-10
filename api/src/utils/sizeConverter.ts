@@ -8,7 +8,7 @@ const units: Record<StorageUnit, number> = {
   'TB': 1024 * 1024 * 1024 * 1024
 };
 
-export function convertBytes(bytes: number, unit: string): number {
+export function convertBytes(bytes: number, unit: string): number {    
     if (isValidStorageUnit(unit)) {
       const convertedValue = bytes / units[unit];
       return Number(convertedValue.toFixed(1));
