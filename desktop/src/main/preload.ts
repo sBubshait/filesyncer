@@ -12,7 +12,12 @@ export type Channels =
   | 'get-sync-status'
   | 'start-sync'
   | 'restart-sync'
-  | 'stop-sync';
+  | 'stop-sync'
+  | 'get-watch-config'
+  | 'add-watch-folder'
+  | 'remove-watch-folder'
+  | 'select-folder'
+  | 'show-confirmation';
 
 const electronHandler = {
   ipcRenderer: {

@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import fs from 'fs';
@@ -106,7 +106,6 @@ interface AWSConfig {
 ipcMain.handle('get-aws-config', async () => {
   console.log('get-aws-config');
   const storage = readStorage();
-  console.log(storage);
   return storage.awsConfig || null;
 });
 
@@ -213,6 +212,110 @@ ipcMain.handle('restart-sync', async () => {
     console.error(`Error while restarting watch: ${error}`);
     throw error;
   }
+});
+
+const getConfigPath = () => {
+  const watchPath = path.join(__dirname, 'watch.js');
+  return path.join(path.dirname(watchPath), 'config.json');
+};
+
+const readConfig = () => {
+  const configPath = getConfigPath();
+  try {
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    return config;
+  } catch (error) {
+    // Return default config if file doesn't exist
+    return {
+      API_URL: 'http://localhost:3000',
+      foldersToWatch: [],
+    };
+  }
+};
+
+const writeConfig = (config: any) => {
+  const configPath = getConfigPath();
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+};
+
+const countFiles = (dirPath: string): number => {
+  let count = 0;
+  const items = fs.readdirSync(dirPath);
+
+  for (const item of items) {
+    const fullPath = path.join(dirPath, item);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isFile()) {
+      count++;
+    } else if (stat.isDirectory()) {
+      count += countFiles(fullPath);
+    }
+  }
+
+  return count;
+};
+
+// Get watch config
+ipcMain.handle('get-watch-config', async () => {
+  console.log('get-watch-config');
+  return readConfig();
+});
+
+// Select folder
+ipcMain.handle('select-folder', async () => {
+  console.log('select-folder');
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  });
+
+  if (result.canceled || !result.filePaths[0]) {
+    return { canceled: true };
+  }
+
+  const folderPath = result.filePaths[0];
+  const fileCount = countFiles(folderPath);
+
+  return {
+    canceled: false,
+    folderPath,
+    fileCount,
+  };
+});
+
+// Show confirmation dialog
+ipcMain.handle('show-confirmation', async (_, { message, title }) => {
+  console.log('show-confirmation');
+  const result = await dialog.showMessageBox({
+    type: 'question',
+    buttons: ['Yes', 'No'],
+    title: title,
+    message: message
+  });
+
+  return result.response === 0;
+});
+
+// Add watch folder
+ipcMain.handle('add-watch-folder', async (_, folderPath) => {
+  console.log('add-watch-folder');
+  const config = readConfig();
+  if (!config.foldersToWatch.includes(folderPath)) {
+    config.foldersToWatch.push(folderPath);
+    writeConfig(config);
+  }
+  return true;
+});
+
+// Remove watch folder
+ipcMain.handle('remove-watch-folder', async (_, folderPath) => {
+  console.log('remove-watch-folder');
+  const config = readConfig();
+  config.foldersToWatch = config.foldersToWatch.filter(
+    (folder: string) => folder !== folderPath
+  );
+  writeConfig(config);
+  return true;
 });
 
 if (process.env.NODE_ENV === 'production') {
