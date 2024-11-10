@@ -261,6 +261,14 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
                   <Folder size={20} />
                   Manage Folders ({folderCount})
                 </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/configureAWS')}
+                  className="mt-3 flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  <Settings size={20} />
+                  Configure AWS
+                </button>
               </div>
             </div>
           )}
