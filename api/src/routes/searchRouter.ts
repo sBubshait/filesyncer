@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import db from "../db/db.js";
+import db from "../db/index.js";
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router.get("/search", async (req: Request, res: Response) => {
     }
   
     try {
-      const results = await db.searchFiles(query as string);
+      const results = await db.search(query as string);
       res.json(results);
     } catch (error) {
       console.error(error);

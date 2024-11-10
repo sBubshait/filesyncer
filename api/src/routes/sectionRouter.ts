@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
-import db from "../db/db.js";
+import db from "../db/index.js";
 
 const router = express.Router();
 
 router.get("/getSection/home", async (req: Request, res: Response) => {
   try {
     // Find all folders with no parent
-    const homeFolders = await db.getHomeFolders();
+    const homeFolders = await db.getHomeFiles();
     res.json(homeFolders);
   } catch (err) {
     console.error(err);

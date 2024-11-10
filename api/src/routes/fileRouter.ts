@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
-import db from "../db/db.js";
+import db from "../db/index.js";
 import { findMostSimilarFolder, linkFolders } from "../utils/addFileUtils.js";
 import { generateDownloadLink } from "../aws.js"
 import { broadcastMessage } from "../websocket.js";
@@ -14,21 +14,15 @@ const storageLimit = process.env.STORAGE_LIMIT || 100;
 const storageType = process.env.STORAGE_TYPE || "MB";
 
 router.get("/getOverview", async (req: Request, res: Response) => {
-  const overview = await db.getOverview();
+  const {fileCount, favouriteCount, totalSize} = await db.getOverview();
 
   const storage = {
-    used: convertBytes(overview.storageUsed, storageType),
+    used: convertBytes(Number(totalSize), storageType),
     total: storageLimit,
     type: storageType,
   }
 
-  res.json({ fileCount: overview.files, favouriteCount: overview.favourites, storage });
-});
-
-router.get("/getFileID", async (req: Request, res: Response) => {
-  const { pathname } = req.query;
-  const fileID = await db.findFileByPath(pathname as string);
-  res.json({ fileID });
+  res.json({ fileCount, favouriteCount: favouriteCount, storage });
 });
 
 router.post("/addFile", addFile);
@@ -36,7 +30,7 @@ router.post("/addFile", addFile);
 router.get("/downloadFile/:fileID", async (req: Request, res: Response) => {
   const { fileID } = req.params;
   try {
-    const file = await db.getFile(fileID);
+    const file = await db.file.get(fileID);
     if (!file) {
       res.status(404).json({ error: "File not found" });
       return;
@@ -56,8 +50,8 @@ router.get("/downloadFile/:fileID", async (req: Request, res: Response) => {
 router.post("/toggleFavourite", async (req: Request, res: Response) => {
   const { fileID } = req.body;
   try {
-    const file = await db.getFile(fileID);
-    const folder = await db.getFolder(fileID);
+    const file = await db.file.get(fileID);
+    const folder = await db.folder.get(fileID);
 
     if (!file && !folder) {
       res.status(404).json({ error: "File or folder not found" });
@@ -65,12 +59,12 @@ router.post("/toggleFavourite", async (req: Request, res: Response) => {
     }
 
     if (file) {
-      await db.toggleFavouriteFile(fileID);
+      await db.file.toggleFavourite(fileID);
     } else {
-      await db.toggleFavouriteFolder(fileID);
+      await db.folder.toggleFavourite(fileID);
     }
 
-    res.json({ toggled: true });
+    res.json({ status: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ toggled: false });
@@ -80,7 +74,7 @@ router.post("/toggleFavourite", async (req: Request, res: Response) => {
 router.post("/deleteFile", async (req: Request, res: Response) => {
   const { fileID } = req.body;
   try {
-    await db.deleteFile(fileID);
+    await db.file.delete(fileID);
 
     broadcastMessage({
       action: "deleteFile",
@@ -110,14 +104,14 @@ async function addFile(req: Request, res: Response) {
   const parentFolderName = parentFolderPath.split("/").pop();
 
   // Check if the file already exists
-  const fileExists = await db.findFileByPath(pathname);
+  const fileExists = await db.file.getByPath(pathname);
   if (fileExists) {
     res.json({ added: false, fileID: fileExists });
     return;
   }
 
   try {
-    let parentFolder = await db.findFolderByPath(parentFolderPath);
+    let parentFolder = await db.folder.getByPath(parentFolderPath);
 
     if (!parentFolder) {
       // We need to create the parentFolder. But first, we may need to create
@@ -134,9 +128,9 @@ async function addFile(req: Request, res: Response) {
 
       // Now create the folder
       const newFolderID = uuidv4();
-      await db.createFolder({
+      await db.folder.create({
         folderID: newFolderID,
-        parentFolderID: undefined, // We may need to link later
+        parentFolderID: null,
         folderName: parentFolderName,
         folderPath: parentFolderPath,
       });
@@ -173,7 +167,7 @@ async function addFile(req: Request, res: Response) {
     // We can now add the file.
 
     const fileID = uuidv4();
-    await db.addFile({
+    await db.file.create({
       fileID: fileID,
       folderID: parentFolder,
       size: size,
