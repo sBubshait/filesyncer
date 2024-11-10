@@ -7,6 +7,7 @@ import sectionRoutes from "./routes/sectionRouter.js";
 import searchRoutes from "./routes/searchRouter.js";
 import authMiddleware from "./utils/authMiddleware.js";
 import { setupWebSocketServer } from "./websocket.js";
+import "./utils/bigIntJSON.js";
 
 const app = express();
 app.use(express.json());
