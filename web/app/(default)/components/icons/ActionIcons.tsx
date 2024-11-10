@@ -33,11 +33,7 @@ export const ViewIcon = ({ className }: { className?: string }) => (
 );
 
 // DownloadIcon
-export const DownloadIcon = ({
-  className
-}: {
-  className?: string;
-}) => (
+export const DownloadIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
     aria-hidden="true"
@@ -59,11 +55,7 @@ export const DownloadIcon = ({
 );
 
 // HeartIcon
-export const HeartIcon = ({
-  className
-}: {
-  className?: string;
-}) => (
+export const HeartIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
     aria-hidden="true"
@@ -76,11 +68,7 @@ export const HeartIcon = ({
 );
 
 // DeleteIcon
-export const DeleteIcon = ({
-  className
-}: {
-  className?: string;
-}) => (
+export const DeleteIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
     aria-hidden="true"
@@ -111,6 +99,25 @@ export const CloseIcon = ({ className = "size-3" }: { className?: string }) => (
       strokeLinejoin="round"
       strokeWidth={2}
       d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+    />
+  </svg>
+);
+
+// UploadIcon
+export const UploadIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 5v9m-5 0H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2M8 9l4-5 4 5m1 8h.01"
     />
   </svg>
 );

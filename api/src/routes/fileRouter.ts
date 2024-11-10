@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import db from "../db/index.js";
 import { findMostSimilarFolder, linkFolders } from "../utils/addFileUtils.js";
-import { generateDownloadLink } from "../aws.js"
+import { generateDownloadLink, generateUploadLink } from "../aws.js"
 import { broadcastMessage } from "../websocket.js";
 import * as dotenv from "dotenv";
 import { convertBytes } from "../utils/sizeConverter.js";
@@ -44,6 +44,38 @@ router.get("/downloadFile/:fileID", async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: true });
+  }
+});
+
+router.post("/generateUploadLink", async (req: Request, res: Response) => {
+  const { filename, contentType, folderID } = req.body;
+  
+  if (!filename || !contentType) {
+    res.status(400).json({ error: "Missing parameters" });
+    return;
+  }
+
+  try {
+    const { url, fields, data } = await generateUploadLink(filename, contentType, folderID);
+    const { fileID, fileName, fileType, size} = data;
+    
+    broadcastMessage({
+      action: "addFile",
+      folder: folderID,
+      file: {
+        fileID: fileID,
+        name: fileName,
+        extension: fileType,
+        size,
+        modifiedAt: new Date().toISOString(),
+      },
+    });
+
+    res.json({ uploadLink: { url, fields }});
+  } catch (error) {
+    console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.status(500).json({ error: true, message: errorMessage });
   }
 });
 

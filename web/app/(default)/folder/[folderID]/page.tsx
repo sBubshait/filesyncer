@@ -15,7 +15,7 @@ export default async function Home({
         <>
             <div className="p-4 sm:ml-64">
               <div className="mt-14"></div>
-              <FilesCard title={folder.name} files={folder.files} extended={true} />
+              <FilesCard title={folder.name} files={folder.files} extended={true} allowUpload={true} uploadFolderID={params.folderID} />
               
             </div>
           </>
