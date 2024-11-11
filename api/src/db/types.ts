@@ -32,6 +32,13 @@ export interface OverviewData {
   totalSize: bigint;
 }
 
+export interface UserData {
+  id: string;
+  provider: string;
+  apiKey: string;
+  createdAt?: Date;
+}
+
 export type GeneralOperations = {
   getOverview(): Promise<OverviewData>
   getHomeFiles(): Promise<FileFolderData[]>
@@ -56,4 +63,10 @@ export type FolderOperations = {
   toggleFavourite(id: string): Promise<void>
   getName(id: string): Promise<string | null>
   getContents(id: string): Promise<FileFolderData[]>
+}
+
+export type UserOperations = {
+  create(data: UserData): Promise<void>
+  get(id: string): Promise<UserData | null>
+  getByApiKey(apiKey: string): Promise<UserData | null>
 }
