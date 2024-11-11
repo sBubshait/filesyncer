@@ -1,10 +1,13 @@
 // app/api/auth/[...nextauth]/route.ts
 import NextAuth, { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import GithubProvider from "next-auth/providers/github";
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { generateServerToken } from './serverTokens';
+import GoogleProvider from "next-auth/providers/google";
+import GithubProvider from "next-auth/providers/github";
+import FacebookProvider from "next-auth/providers/facebook";
+import TwitterProvider from "next-auth/providers/twitter";
+import AppleProvider from "next-auth/providers/apple";
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 
@@ -17,6 +20,19 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_ID!,
+      clientSecret: process.env.FACEBOOK_SECRET!,
+    }),
+    TwitterProvider({
+      clientId: process.env.TWITTER_API_KEY!,
+      clientSecret: process.env.TWITTER_API_SECRET_KEY!,
+      version: "2.0"
+    }),
+    AppleProvider({
+      clientId: process.env.APPLE_ID!,
+      clientSecret: process.env.APPLE_SECRET!,
     }),
   ],
   callbacks: {
