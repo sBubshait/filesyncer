@@ -18,11 +18,12 @@ import ModalButton from "./ModalButton";
 import { getDownloadLink, toggleFavourite, deleteFile } from "../lib/apiClient";
 import { formatFileSize } from "../lib/utils";
 import { WS_URL } from "../lib/apiClient";
+import { getSession } from "next-auth/react";
 import Uploader from "./Uploader";
 
 export default function FilesCard({
   title,
-  files: initialFiles,
+  files = [],
   extended,
   allowUpload = false,
   uploadFolderID,
@@ -35,7 +36,7 @@ export default function FilesCard({
 }) {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [highlighted, setHighlighted] = useState<string | null>(null);
-  const [files, setFiles] = useState<FileFolder[]>(initialFiles);
+  const [cardFiles, setCardFiles] = useState<FileFolder[]>(files);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -60,10 +61,10 @@ export default function FilesCard({
         )
           return;
 
-        if (pathname == "/") setFiles((prevFiles) => [data.file, ...prevFiles]);
-        else setFiles((prevFiles) => [...prevFiles, data.file]);
+        if (pathname == "/") setCardFiles((prevFiles) => [data.file, ...prevFiles]);
+        else setCardFiles((prevFiles) => [...prevFiles, data.file]);
       } else if (data.action === "deleteFile") {
-        setFiles((prevFiles) =>
+        setCardFiles((prevFiles) =>
           prevFiles.filter((file) => file.fileID !== data.fileID),
         );
       }
@@ -137,7 +138,7 @@ export default function FilesCard({
 
 
   const renderFileModals = () => {
-    return files.map((file) => 
+    return cardFiles.map((file) => 
       openModal === file.fileID && (
         <div
           key={`modal-${file.fileID}`}
@@ -256,7 +257,7 @@ export default function FilesCard({
           )}
         </div>
 
-        {files.length === 0 ? (
+        {cardFiles.length === 0 ? (
           <div className="flex flex-1 items-center justify-center">
             <TrashIcon className="mr-4 size-12 text-gray-500" />
             <div className="flex flex-col items-start">
@@ -269,7 +270,7 @@ export default function FilesCard({
         ) : (
           <div className="mb-2 mt-4 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:xl:grid-cols-5">
             {/* File cards */}
-            {files.map((file) => (
+            {cardFiles.map((file) => (
               <div
                 className={`w-full max-w-sm rounded-lg border ${
                   highlighted === file.fileID
