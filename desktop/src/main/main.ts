@@ -117,6 +117,7 @@ const updateEnvFile = (updates: Record<string, string | undefined>) => {
 // IPC Handlers
 ipcMain.handle('get-token', async () => {
   console.log('get-token');
+  console.log(getStoragePath());
   const storage = readStorage();
   return storage.accessToken || null;
 });
@@ -409,7 +410,7 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 512,
-    height: 600,
+    height: 750,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged

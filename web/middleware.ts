@@ -1,33 +1,41 @@
+// middleware.ts
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
+import { NextRequestWithAuth, withAuth } from 'next-auth/middleware';
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+export default withAuth(
+  function middleware(request: NextRequestWithAuth) {
+    // Check if the user is authenticated and trying to access protected routes
+    if (!request.nextauth.token) {
+      // Save the requested URL to redirect back after login
+      const redirectUrl = request.nextUrl.pathname + request.nextUrl.search;
+      const encodedRedirectUrl = encodeURIComponent(redirectUrl);
+      
+      return NextResponse.redirect(
+        new URL(`/auth/signin?callbackUrl=${encodedRedirectUrl}`, request.url)
+      );
+    }
 
-const publicRoutes = ['/login'];
-
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  if (publicRoutes.includes(pathname)) {
     return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
   }
+);
 
-  const token = req.cookies.get('token');
-
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  try {
-    await jwtVerify(token.value, secret);
-    return NextResponse.next();
-  } catch (error) {
-    console.error(error);
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-}
-
+// Protect all routes except auth and public routes
 export const config = {
-  matcher: ['/', '/protected-pages/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (auth API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - auth folder (sign in pages)
+     */
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|public|auth).*)',
+  ],
 };

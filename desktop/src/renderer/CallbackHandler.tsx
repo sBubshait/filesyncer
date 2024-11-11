@@ -15,7 +15,7 @@ export default function CallbackHandler() {
       window.electron.ipcRenderer.sendMessage('store-token', token);
       navigate('/dashboard');
     } else {
-      navigate('/ss');
+      // navigate('/');
     }
   }, [navigate]);
 

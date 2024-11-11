@@ -7,6 +7,7 @@ import { GeneralOperations, FileOperations, FolderOperations } from './types.js'
 import { generalModel } from './models/general.model.js'
 import { fileModel } from './models/file.model.js'
 import { folderModel } from './models/folder.model.js'
+import { userModel } from './models/user.model.js'
 
 
 export default {
@@ -20,4 +21,5 @@ export default {
     // Namespaced Operations
     file: fileModel,
     folder: folderModel,
+    user: userModel
 }

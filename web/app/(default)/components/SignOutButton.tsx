@@ -2,6 +2,7 @@
 
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { signOut } from "next-auth/react"
 
 export default function SignOutButton() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function SignOutButton() {
     <button
       type="button"
       className="flex font-semibold"
-      onClick={handleSignOut}
+      onClick={() => signOut({ callbackUrl: '/api/auth/signin' })}
     >
       <svg
         className="mr-1 size-6"

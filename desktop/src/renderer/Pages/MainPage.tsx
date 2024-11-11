@@ -234,16 +234,16 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
           )}
 
           {/* Quick Actions */}
-          {status === 'syncing' && (
-            <div className="bg-gray-800 rounded-lg p-4 mt-4">
-              <h3 className="text-lg font-medium text-white mb-2">
-                Quick Actions
-              </h3>
-              <div className="flex flex-col items-center space-y-3 mt-4">
+          <div className="bg-gray-800 rounded-lg p-4 mt-4 text-center">
+            <h3 className="text-lg font-medium text-white mb-2">
+              Quick Actions
+            </h3>
+            <div className="flex flex-col items-center space-y-3 mt-4">
+              {status === 'syncing' && (
                 <button
                   type="button"
                   onClick={handleRestartSync}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   <RefreshCw
                     size={20}
@@ -253,25 +253,27 @@ export default function AuthenticatedView({ token }: { token: string | null }) {
                   />
                   Restart Sync
                 </button>
+              )}
+              {(status === 'syncing' || status === 'stopped') && (
                 <button
                   type="button"
                   onClick={() => navigate('/folders')}
-                  className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   <Folder size={20} />
                   Manage Folders ({folderCount})
                 </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/configureAWS')}
-                  className="mt-3 flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  <Settings size={20} />
-                  Configure AWS
-                </button>
-              </div>
+              )}
+              <button
+                type="button"
+                onClick={() => navigate('/configureAWS')}
+                className="w-full flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <Settings size={20} />
+                Configure AWS
+              </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ export default function Main() {
   const handleSignIn = () => {
     // Redirect to login page with callback URL
     const callbackUrl = `${window.location.origin}/callback`;
-    window.location.href = `http://localhost:3001/login?callback=${encodeURIComponent(callbackUrl)}`;
+    window.location.href = `http://localhost:3001/api/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
   };
 
   return (
