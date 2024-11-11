@@ -1,6 +1,4 @@
 {
   "API_URL": "http://localhost:3000",
-  "foldersToWatch": [
-    "/Users/bubshait/Desktop/My life/Habits"
-  ]
+  "foldersToWatch": []
 }
