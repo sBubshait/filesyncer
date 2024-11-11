@@ -4,13 +4,31 @@ services:
   api:
     build:
       context: ./api
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+      - STORAGE_LIMIT=40
+      - STORAGE_TYPE=MB
 
   web:
     build:
       context: ./web
+      dockerfile: Dockerfile
     ports:
       - "3001:3001"
     environment:
+      - NODE_ENV=production
       - API_URL=http://api:3000
+      - JWT_SECRET=${JWT_SECRET}
+      - NEXTAUTH_SECRET=${JWT_SECRET}
+      - NEXTAUTH_URL=http://localhost:3001
+      - GOOGLE_ID=${GOOGLE_ID}
+      - GOOGLE_SECRET=${GOOGLE_SECRET}
