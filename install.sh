@@ -8,9 +8,18 @@ fi
 
 npm install pm2 -g
 
-cd client
+## Install the CLI tool
+# cd cli
+# npm install
+
+# npm link
+
+## Install the Desktop App
+cd Desktop
 npm install
 
-npm link
+## Install Watcher
+cd src/watcher
+npm install
 
 echo "Setup completed successfully!"
