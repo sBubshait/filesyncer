@@ -7,6 +7,8 @@ import Cookies from 'js-cookie';
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
 
+const API_URL = process.env.API_URL || "http://localhost:3000";
+
 interface UploaderProps {
   onUploadComplete?: (results: any[]) => void;
   onUploadError?: (error: Error) => void;
@@ -36,10 +38,10 @@ function createUppy({
   });
 
   uppy.use(AwsS3, {
-    endpoint: 'http://localhost:3000',
+    endpoint: API_URL,
     getUploadParameters: async (file) => {
       try {
-        const response = await fetch("http://localhost:3000/generateUploadLink", {
+        const response = await fetch(`${API_URL}/generateUploadLink`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,

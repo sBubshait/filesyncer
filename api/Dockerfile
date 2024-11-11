@@ -4,6 +4,8 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
+COPY src/db/prisma* src/db/schema.prisma ./src/db/
+
 RUN npm install
 
 COPY . .

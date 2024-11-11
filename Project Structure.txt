@@ -1,0 +1,236 @@
+├── api
+│   ├── dist
+│   │   ├── src
+│   │   │   ├── db
+│   │   │   │   ├── models
+│   │   │   │   │   ├── file.model.js
+│   │   │   │   │   ├── folder.model.js
+│   │   │   │   │   ├── general.model.js
+│   │   │   │   │   └── user.model.js
+│   │   │   │   ├── db.js
+│   │   │   │   ├── index.js
+│   │   │   │   ├── prisma.js
+│   │   │   │   └── types.js
+│   │   │   ├── routes
+│   │   │   │   ├── authRouter.js
+│   │   │   │   ├── fileRouter.js
+│   │   │   │   ├── folderRouter.js
+│   │   │   │   ├── searchRouter.js
+│   │   │   │   └── sectionRouter.js
+│   │   │   ├── utils
+│   │   │   │   ├── addFileUtils.js
+│   │   │   │   ├── auth.js
+│   │   │   │   ├── authMiddleware.js
+│   │   │   │   ├── bigIntJSON.js
+│   │   │   │   ├── envPath.js
+│   │   │   │   └── sizeConverter.js
+│   │   │   ├── aws.js
+│   │   │   ├── index.js
+│   │   │   └── websocket.js
+│   │   ├── tests
+│   │   │   ├── routes
+│   │   │   │   ├── authRouter.test.js
+│   │   │   │   ├── fileRouter.test.js
+│   │   │   │   ├── folderRouter.test.js
+│   │   │   │   ├── searchRouter.test.js
+│   │   │   │   └── sectionRouter.test.js
+│   │   │   └── utils
+│   │   │       └── sizeConverter.test.js
+│   │   └── .DS_Store
+│   ├── src
+│   │   ├── db
+│   │   │   ├── models
+│   │   │   │   ├── file.model.ts
+│   │   │   │   ├── folder.model.ts
+│   │   │   │   ├── general.model.ts
+│   │   │   │   └── user.model.ts
+│   │   │   ├── db.ts
+│   │   │   ├── index.ts
+│   │   │   ├── prisma.ts
+│   │   │   ├── schema.prisma
+│   │   │   └── types.ts
+│   │   ├── routes
+│   │   │   ├── authRouter.ts
+│   │   │   ├── fileRouter.ts
+│   │   │   ├── folderRouter.ts
+│   │   │   ├── searchRouter.ts
+│   │   │   └── sectionRouter.ts
+│   │   ├── utils
+│   │   │   ├── addFileUtils.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── authMiddleware.ts
+│   │   │   ├── bigIntJSON.ts
+│   │   │   ├── envPath.ts
+│   │   │   └── sizeConverter.ts
+│   │   ├── .DS_Store
+│   │   ├── aws.ts
+│   │   ├── index.ts
+│   │   └── websocket.ts
+│   ├── tests
+│   │   ├── routes
+│   │   │   ├── authRouter.test.ts
+│   │   │   ├── fileRouter.test.ts
+│   │   │   ├── folderRouter.test.ts
+│   │   │   ├── searchRouter.test.ts
+│   │   │   └── sectionRouter.test.ts
+│   │   ├── utils
+│   │   │   └── sizeConverter.test.ts
+│   │   └── .DS_Store
+│   ├── .DS_Store
+│   ├── Dockerfile
+│   ├── jest.config.mjs
+│   ├── package-lock.json
+│   ├── package.json
+│   └── tsconfig.json
+├── cli
+│   ├── src
+│   │   ├── .DS_Store
+│   │   ├── aws.js
+│   │   ├── db.js
+│   │   ├── ignore.json
+│   │   ├── logger.js
+│   │   ├── package.json
+│   │   └── watch.js
+│   ├── .DS_Store
+│   ├── config.json
+│   ├── index.js
+│   ├── package-lock.json
+│   └── package.json
+├── desktop
+  ├── assets
+│   │   ├── icons
+│   │   │   ├── 1024x1024.png
+│   │   │   ├── 128x128.png
+│   │   │   ├── 16x16.png
+│   │   │   ├── 24x24.png
+│   │   │   ├── 256x256.png
+│   │   │   ├── 32x32.png
+│   │   │   ├── 48x48.png
+│   │   │   ├── 512x512.png
+│   │   │   ├── 64x64.png
+│   │   │   └── 96x96.png
+│   │   ├── assets.d.ts
+│   │   ├── entitlements.mac.plist
+│   │   ├── icon.icns
+│   │   ├── icon.ico
+│   │   ├── icon.png
+│   │   └── icon.svg
+│   ├── release
+│   │   └── app
+│   │       ├── package-lock.json
+│   │       └── package.json
+│   ├── src
+│   │   ├── __tests__
+│   │   │   └── App.test.tsx
+│   │   ├── main
+│   │   │   ├── main.ts
+│   │   │   ├── menu.ts
+│   │   │   ├── preload.ts
+│   │   │   ├── types.ts
+│   │   │   └── util.ts
+│   │   ├── renderer
+│   │   │   ├── Pages
+│   │   │   │   ├── AWSConfiguration.tsx
+│   │   │   │   ├── FolderPage.tsx
+│   │   │   │   └── MainPage.tsx
+│   │   │   ├── App.css
+│   │   │   ├── App.tsx
+│   │   │   ├── AuthenticatedView.tsx
+│   │   │   ├── CallbackHandler.tsx
+│   │   │   ├── index.ejs
+│   │   │   ├── index.tsx
+│   │   │   ├── Main.tsx
+│   │   │   └── preload.d.ts
+│   │   ├── watcher
+│   │   │   ├── utils
+│   │   │   │   ├── api.js
+│   │   │   │   ├── aws.js
+│   │   │   │   └── logger.js
+│   │   │   ├── .DS_Store
+│   │   │   ├── config.json
+│   │   │   ├── file.log
+│   │   │   ├── ignore.json
+│   │   │   ├── index.js
+│   │   │   ├── package-lock.json
+│   │   │   └── package.json
+│   │   └── .DS_Store
+│   ├── .DS_Store
+│   ├── .editorconfig
+│   ├── .eslintignore
+│   ├── .eslintrc.js
+│   ├── file.log
+│   ├── LICENSE
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   └── tsconfig.json
+├── web
+   ├── app
+│   │   ├── (default)
+│   │   │   ├── components
+│   │   │   │   ├── icons
+│   │   │   │   │   ├── ActionIcons.tsx
+│   │   │   │   │   ├── FileIcons.tsx
+│   │   │   │   │   ├── OtherIcons.tsx
+│   │   │   │   │   └── SidebarIcons.tsx
+│   │   │   │   ├── DashboardLayout.tsx
+│   │   │   │   ├── FilesCard.tsx
+│   │   │   │   ├── ModalButton.tsx
+│   │   │   │   ├── SearchResults.tsx
+│   │   │   │   ├── SearchResultsFilesCard.tsx
+│   │   │   │   ├── SignOutButton.tsx
+│   │   │   │   └── Uploader.tsx
+│   │   │   ├── favourites
+│   │   │   │   └── page.tsx
+│   │   │   ├── files
+│   │   │   │   └── page.tsx
+│   │   │   ├── folder
+│   │   │   │   └── [folderID]
+│   │   │   │       └── page.tsx
+│   │   │   ├── lib
+│   │   │   │   ├── api.ts
+│   │   │   │   ├── apiClient.ts
+│   │   │   │   └── utils.ts
+│   │   │   ├── recent
+│   │   │   │   └── page.tsx
+│   │   │   ├── search
+│   │   │   │   └── page.tsx
+│   │   │   ├── view
+│   │   │   │   └── [fileID]
+│   │   │   │       └── page.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── providers.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   └── types.ts
+│   │   ├── api
+│   │   │   └── auth
+│   │   │       └── [...nextauth]
+│   │   │           ├── route.ts
+│   │   │           └── serverTokens.ts
+│   │   └── .DS_Store
+│   ├── public
+│   ├── types
+│   │   └── next-auth.d.ts
+│   ├── .DS_Store
+│   ├── .eslintrc.json
+│   ├── Dockerfile
+│   ├── LICENSE
+│   ├── middleware.ts
+│   ├── next-env.d.ts
+│   ├── next.config.mjs
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── prettier.config.js
+│   ├── tailwind.config.ts
+│   └── tsconfig.json
+├── .DS_Store
+├── compose.yml
+├── file.log
+├── install.sh
+├── LICENSE
+├── README.md
+└── script.py
