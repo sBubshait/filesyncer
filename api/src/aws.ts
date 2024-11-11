@@ -14,6 +14,37 @@ const s3 = new AWS.S3({
 
 const bucketName = process.env.AWS_BUCKET_NAME;
 
+export interface AWSConfig {
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucketName: string;
+  region: string;
+}
+
+export const validateAWSConfig = async (config: AWSConfig): Promise<boolean> => {
+  try {
+    // Create a new S3 instance with the provided credentials
+    const testS3 = new AWS.S3({
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+      region: config.region,
+      signatureVersion: "v4"
+    });
+
+    // Try to list objects in the bucket (with max 1 result)
+    // This will test both the credentials and bucket access
+    await testS3.listObjectsV2({
+      Bucket: config.bucketName,
+      MaxKeys: 1
+    }).promise();
+
+    return true;
+  } catch (error) {
+    console.error('AWS Credentials validation failed:', error);
+    return false;
+  }
+};
+
 export const generateDownloadLink = (fileID: string, displayName: string = fileID): string => {
   // Generate a signed URL for the file valid for 1 hour
 
