@@ -3,7 +3,7 @@ import express, { Express } from 'express';
 import router from '../../src/routes/folderRouter.js';
 import db from '../../src/db/index.js';
 
-jest.mock('../src/db/index.js', () => ({
+jest.mock('../../src/db/index.js', () => ({
   folder: {
     get: jest.fn(),
     getContents: jest.fn(),

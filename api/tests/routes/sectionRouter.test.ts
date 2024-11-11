@@ -4,14 +4,14 @@ import router from '../../src/routes/sectionRouter.js';
 import db from '../../src/db/index.js';
 import { convertBytes } from '../../src/utils/sizeConverter.js';
 
-jest.mock('../src/db/index.js', () => ({
+jest.mock('../../src/db/index.js', () => ({
   getOverview: jest.fn(),
   getHomeFiles: jest.fn(),
   getRecentFiles: jest.fn(),
   getFavouriteFiles: jest.fn(),
 }));
 
-jest.mock('../src/utils/sizeConverter.js', () => ({
+jest.mock('../../src/utils/sizeConverter.js', () => ({
   convertBytes: jest.fn(),
 }));
 

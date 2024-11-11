@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/index.js",
-    "test": "jest",
+    "test": "jest --no-cache --runInBand",
     "test:watch": "jest --watch"
   },
   "author": "",
@@ -37,6 +37,7 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.3",
+    "ts-node": "^10.9.2",
     "uuid": "^10.0.0",
     "ws": "^8.18.0"
   },

@@ -3,7 +3,7 @@ import express, { Express } from 'express';
 import router from '../../src/routes/searchRouter.js';
 import db from '../../src/db/index.js';
 
-jest.mock('../src/db/index.js', () => ({
+jest.mock('../../src/db/index.js', () => ({
   search: jest.fn(),
 }));
 

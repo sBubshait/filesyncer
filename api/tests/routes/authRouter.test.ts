@@ -3,11 +3,11 @@ import express, { Express } from 'express';
 import router from '../../src/routes/authRouter.js';
 import { generateToken } from '../../src/utils/auth.js';
 
-jest.mock('../src/utils/auth.js', () => ({
+jest.mock('../../src/utils/auth.js', () => ({
   generateToken: jest.fn()
 }));
 
-jest.mock('../src/utils/envPath.js', () => ({
+jest.mock('../../src/utils/envPath.js', () => ({
   getEnvPath: jest.fn().mockReturnValue('.env.test')
 }));
 
@@ -16,6 +16,7 @@ const originalEnv = process.env;
 
 describe('Auth Router', () => {
   let app: Express;
+  let consoleSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.resetModules();
@@ -30,10 +31,11 @@ describe('Auth Router', () => {
     };
 
     jest.clearAllMocks();
+    consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-
+    consoleSpy.mockRestore();
     process.env = originalEnv;
   });
 
@@ -208,6 +210,7 @@ describe('Auth Router', () => {
 
       expect(response.body).toEqual({ error: true });
       expect(generateToken).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalled();
     });
   });
 });

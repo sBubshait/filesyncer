@@ -5,19 +5,19 @@ import db from "../../src/db/index.js";
 import { generateDownloadLink } from "../../src/aws.js";
 const mockGet = jest.fn();
 
-jest.mock("../src/db/index", () => ({
+jest.mock("../../src/db/index", () => ({
   file: {
     get: jest.fn()
   }
 }));
 
 
-jest.mock('../src/aws.js', () => ({
+jest.mock('../../src/aws.js', () => ({
   generateDownloadLink: jest.fn(),
   generateUploadLink: jest.fn()
 }));
 
-jest.mock("../src/utils/sizeConverter");
+jest.mock("../../src/utils/sizeConverter");
 
 const app = express();
 app.use(express.json());
