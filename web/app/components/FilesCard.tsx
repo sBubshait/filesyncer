@@ -61,7 +61,8 @@ export default function FilesCard({
         )
           return;
 
-        if (pathname == "/") setCardFiles((prevFiles) => [data.file, ...prevFiles]);
+        if (pathname == "/")
+          setCardFiles((prevFiles) => [data.file, ...prevFiles]);
         else setCardFiles((prevFiles) => [...prevFiles, data.file]);
       } else if (data.action === "deleteFile") {
         setCardFiles((prevFiles) =>
@@ -77,18 +78,20 @@ export default function FilesCard({
     return () => {
       socket.close();
     };
-  }, []);
+  }, [pathname]);
 
-  const uploader = useMemo(() => (
-    <Uploader 
-      folderID={uploadFolderID}
-      onUploadComplete={(results) => {
-        // Optional: handle upload completion
-        handleCloseModal();
-      }}
-    />
-  ), [uploadFolderID]); // Only recreate if uploadFolderID changes
-
+  const uploader = useMemo(
+    () => (
+      <Uploader
+        folderID={uploadFolderID}
+        onUploadComplete={(results) => {
+          // Optional: handle upload completion
+          handleCloseModal();
+        }}
+      />
+    ),
+    [uploadFolderID],
+  ); // Only recreate if uploadFolderID changes
 
   const handleOpenModal = (fileID: string) => {
     setOpenModal(fileID);
@@ -136,68 +139,68 @@ export default function FilesCard({
     handleCloseModal();
   };
 
-
   const renderFileModals = () => {
-    return cardFiles.map((file) => 
-      openModal === file.fileID && (
-        <div
-          key={`modal-${file.fileID}`}
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-10"
-          onClick={handleCloseModal}
-        >
+    return cardFiles.map(
+      (file) =>
+        openModal === file.fileID && (
           <div
-            className="relative w-full max-w-2xl p-4"
-            onClick={(e) => e.stopPropagation()}
+            key={`modal-${file.fileID}`}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/10"
+            onClick={handleCloseModal}
           >
-            <div className="relative rounded-lg bg-white shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between rounded-t border-b p-4 dark:border-gray-600 md:p-5">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {file.name}
-                  {file.type == "file" && `.${file.extension}`}
-                </h3>
-                <button
-                  type="button"
-                  className="ms-auto inline-flex size-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
-                  onClick={handleCloseModal}
-                >
-                  <CloseIcon />
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-              <div className="space-y-4 p-4 md:p-5">
-                <div
-                  className={`grid ${
-                    canViewFile(file.extension)
-                      ? "md:grid-cols-4"
-                      : "md:grid-cols-3"
-                  } gap-4 p-4 sm:grid-cols-2 md:p-5`}
-                >
-                  <ModalButton
-                    icon={<ViewIcon />}
-                    text="View"
-                    href={`/view/${file.fileID}`}
-                  />
-                  <ModalButton
-                    icon={<DownloadIcon />}
-                    text="Download"
-                    action={() => handleDownloadClick(file.fileID)}
-                  />
-                  <ModalButton
-                    icon={<HeartIcon />}
-                    text="Favourite"
-                    action={() => handleFavouriteClick(file.fileID)}
-                  />
-                  <ModalButton
-                    icon={<DeleteIcon />}
-                    text="Delete"
-                    action={() => handleDeleteClick(file.fileID)}
-                  />
+            <div
+              className="relative w-full max-w-2xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative rounded-lg bg-white shadow dark:bg-gray-700">
+                <div className="flex items-center justify-between rounded-t border-b p-4 dark:border-gray-600 md:p-5">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {file.name}
+                    {file.type == "file" && `.${file.extension}`}
+                  </h3>
+                  <button
+                    type="button"
+                    className="ms-auto inline-flex size-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+                    onClick={handleCloseModal}
+                  >
+                    <CloseIcon />
+                    <span className="sr-only">Close modal</span>
+                  </button>
+                </div>
+                <div className="space-y-4 p-4 md:p-5">
+                  <div
+                    className={`grid ${
+                      canViewFile(file.extension)
+                        ? "md:grid-cols-4"
+                        : "md:grid-cols-3"
+                    } gap-4 p-4 sm:grid-cols-2 md:p-5`}
+                  >
+                    <ModalButton
+                      icon={<ViewIcon />}
+                      text="View"
+                      href={`/view/${file.fileID}`}
+                    />
+                    <ModalButton
+                      icon={<DownloadIcon />}
+                      text="Download"
+                      action={() => handleDownloadClick(file.fileID)}
+                    />
+                    <ModalButton
+                      icon={<HeartIcon />}
+                      text="Favourite"
+                      action={() => handleFavouriteClick(file.fileID)}
+                    />
+                    <ModalButton
+                      icon={<DeleteIcon />}
+                      text="Delete"
+                      action={() => handleDeleteClick(file.fileID)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )
+        ),
     );
   };
 
@@ -206,7 +209,7 @@ export default function FilesCard({
 
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-10"
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/10"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             handleCloseModal();
@@ -228,15 +231,12 @@ export default function FilesCard({
                 <span className="sr-only">Close modal</span>
               </button>
             </div>
-            <div className="p-4 md:p-5">
-              {uploader}
-            </div>
+            <div className="p-4 md:p-5">{uploader}</div>
           </div>
         </div>
       </div>
     );
   };
-
 
   return (
     <>
@@ -261,7 +261,9 @@ export default function FilesCard({
           <div className="flex flex-1 items-center justify-center">
             <TrashIcon className="mr-4 size-12 text-gray-500" />
             <div className="flex flex-col items-start">
-              <p className="text-xl font-semibold dark:text-white">Nothing here</p>
+              <p className="text-xl font-semibold dark:text-white">
+                Nothing here
+              </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Start by adding files to your directory.
               </p>

@@ -22,7 +22,7 @@ export default function DashboardLayout({
   children,
 }: {
   title: string;
-  storage: { total: number; used: number, type: string };
+  storage: { total: number; used: number; type: string };
   fileCount: number;
   favouriteCount: number;
   children?: React.ReactNode;
@@ -42,8 +42,18 @@ export default function DashboardLayout({
     topItems: [
       { name: "Home", href: "/", icon: HomeIcon },
       { name: "Search", href: "/search", icon: SearchIcon },
-      { name: "All Files", href: "/files", icon: FilesIcon, tag: `${fileCount}` },
-      { name: "Favourites", href: "/favourites", icon: HeartIcon, tag: `${favouriteCount}` },
+      {
+        name: "All Files",
+        href: "/files",
+        icon: FilesIcon,
+        tag: `${fileCount}`,
+      },
+      {
+        name: "Favourites",
+        href: "/favourites",
+        icon: HeartIcon,
+        tag: `${favouriteCount}`,
+      },
       { name: "Recent", href: "/recent", icon: ClockIcon },
     ],
     bottomItems: [
@@ -61,7 +71,7 @@ export default function DashboardLayout({
               <button
                 aria-controls="logo-sidebar"
                 type="button"
-                className="inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 sm:hidden dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                className="inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 sm:hidden"
                 onClick={toggleSidebar}
               >
                 <span className="sr-only">Open sidebar</span>
@@ -80,20 +90,19 @@ export default function DashboardLayout({
                 </svg>
               </button>
               <div className="ms-2 flex md:me-24">
-                <span className="self-center whitespace-nowrap text-xl font-bold sm:text-2xl dark:text-white">
+                <span className="self-center whitespace-nowrap text-xl font-bold dark:text-white sm:text-2xl">
                   {title}
                 </span>
               </div>
             </div>
 
-              <div className="flex items-center">
-                <div className="ms-3 flex items-center">
-                  <div className="text-gray-800 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-white">
-                    <SignOutButton />
-                  </div>
+            <div className="flex items-center">
+              <div className="ms-3 flex items-center">
+                <div className="text-gray-800 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-white">
+                  <SignOutButton />
                 </div>
               </div>
-              
+            </div>
           </div>
         </div>
       </nav>
@@ -116,14 +125,12 @@ export default function DashboardLayout({
                   <Link
                     href={item.href}
                     className={`group flex items-center rounded-lg p-2 text-gray-900 hover:bg-sky-50 ${
-                        isActive ? "bg-sky-50" : ""
+                      isActive ? "bg-sky-50" : ""
                     }`}
                   >
                     <div
                       className={`size-5 ${
-                        isActive
-                          ? "text-indigo-700"
-                          : "text-gray-500"
+                        isActive ? "text-indigo-700" : "text-gray-500"
                       } transition duration-75 group-hover:text-indigo-700 dark:text-gray-400 dark:group-hover:text-white`}
                     >
                       {item.icon}
@@ -133,9 +140,7 @@ export default function DashboardLayout({
                       className={`ms-3 font-semibold ${
                         item.tag ? "flex-1 whitespace-nowrap" : ""
                       } ${
-                        isActive
-                          ? "text-indigo-700 dark:text-white"
-                          : ""
+                        isActive ? "text-indigo-700 dark:text-white" : ""
                       } group-hover:text-indigo-700`}
                     >
                       {item.name}
@@ -200,7 +205,8 @@ export default function DashboardLayout({
               </div>
 
               <div className="m-2 mt-3 text-xs text-gray-500 dark:text-gray-400">
-                {storage.used} {storage.type} of {storage.total} {storage.type} used
+                {storage.used} {storage.type} of {storage.total} {storage.type}{" "}
+                used
               </div>
             </div>
           </div>
