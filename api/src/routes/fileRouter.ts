@@ -2,13 +2,33 @@ import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import db from "../db/index.js";
 import { findMostSimilarFolder, linkFolders } from "../utils/addFileUtils.js";
-import { generateDownloadLink, generateUploadLink } from "../aws.js"
+import { generateDownloadLink, generateUploadLink } from "../aws.js";
 import { broadcastMessage } from "../websocket.js";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const router = express.Router();
 
+router.get("/getFileID", async (req: Request, res: Response) => {
+  try {
+    const { pathname } = req.query;
+    if (!pathname || typeof pathname !== 'string') {
+      res.status(400).json({ error: "Missing parameters" });
+      return;
+    }
+
+    const fileID = await db.file.getByPath(pathname);
+    if (!fileID) {
+      res.status(404).json({ error: "File not found" });
+      return;
+    }
+
+    res.json({ fileID: fileID });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: true });
+  }
+});
 
 router.post("/addFile", addFile);
 
@@ -34,16 +54,20 @@ router.get("/downloadFile/:fileID", async (req: Request, res: Response) => {
 
 router.post("/generateUploadLink", async (req: Request, res: Response) => {
   const { filename, contentType, folderID } = req.body;
-  
+
   if (!filename || !contentType) {
     res.status(400).json({ error: "Missing parameters" });
     return;
   }
 
   try {
-    const { url, fields, data } = await generateUploadLink(filename, contentType, folderID);
-    const { fileID, fileName, fileType, size} = data;
-    
+    const { url, fields, data } = await generateUploadLink(
+      filename,
+      contentType,
+      folderID
+    );
+    const { fileID, fileName, fileType, size } = data;
+
     broadcastMessage({
       action: "addFile",
       folder: folderID,
@@ -56,10 +80,11 @@ router.post("/generateUploadLink", async (req: Request, res: Response) => {
       },
     });
 
-    res.json({ uploadLink: { url, fields }});
+    res.json({ uploadLink: { url, fields } });
   } catch (error) {
     console.error(error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
     res.status(500).json({ error: true, message: errorMessage });
   }
 });
