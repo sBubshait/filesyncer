@@ -1,6 +1,6 @@
 import AWS from "aws-sdk";
 import dotenv from "dotenv";
-import db from "./db/db.js";
+import db from "./db/index.js";
 import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
@@ -68,7 +68,7 @@ export const generateUploadLink = async (filename: string, contentType: string, 
   try {
     if (folderID) {
       // If a folderID is provided, check if the folder exists
-      const folder = await db.getFolder(folderID);
+      const folder = await db.folder.get(folderID);
       if (!folder) {
         throw new Error("Could not find folder to insert file into");
       }
@@ -80,7 +80,7 @@ export const generateUploadLink = async (filename: string, contentType: string, 
     const fileID = uuidv4();
 
     // Add file to database first
-    await db.addFile({
+    await db.file.create({
       fileID: fileID,
       folderID: folderID || null,
       size: 0n,
