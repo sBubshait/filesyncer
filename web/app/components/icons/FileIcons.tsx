@@ -1,8 +1,4 @@
-export const FolderIcon = ({
-  className = "svg-icon",
-}: {
-  className?: string;
-}) => (
+export const FolderIcon = ({ className = "" }: { className?: string }) => (
   <svg
     className={className}
     style={{
@@ -28,7 +24,6 @@ export const FolderIcon = ({
 
 const OtherFileIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -56,7 +51,6 @@ const OtherFileIcon = (
 
 const DocumentIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -91,7 +85,6 @@ const DocumentIcon = (
 
 const TextIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -118,7 +111,6 @@ const TextIcon = (
 
 const PDFIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -145,7 +137,6 @@ const PDFIcon = (
 
 const WebIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -172,7 +163,6 @@ const WebIcon = (
 
 const CompressedFile = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -207,7 +197,6 @@ const CompressedFile = (
 
 const ImageIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -234,7 +223,6 @@ const ImageIcon = (
 
 const AudioIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -261,7 +249,6 @@ const AudioIcon = (
 
 const VideoIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
@@ -292,7 +279,6 @@ const VideoIcon = (
 
 const CodeIcon = (
   <svg
-    className="svg-icon"
     style={{
       verticalAlign: "middle",
       fill: "currentColor",
